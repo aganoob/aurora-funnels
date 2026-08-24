@@ -1,2 +1,20 @@
 import { NextResponse } from "next/server";
-export async function POST() { const secret = process.env.STRIPE_WEBHOOK_SECRET; const key = process.env.STRIPE_SECRET_KEY; if (!secret?.trim() || !key?.trim()) return NextResponse.json({ received: true, mocked: true }, { status: 202 }); return NextResponse.json({ received: true }); }
+import Stripe from "stripe";
+import type { TrackedEvent } from "@aganoob/analytics";
+import { serverAnalytics } from "../../../lib/analytics-server";
+
+export async function POST(request: Request) {
+  const secret = process.env.STRIPE_WEBHOOK_SECRET;
+  const key = process.env.STRIPE_SECRET_KEY;
+  if (!secret?.trim() || !key?.trim()) return NextResponse.json({ received: true, mocked: true }, { status: 202 });
+  const signature = request.headers.get("stripe-signature");
+  if (!signature) return NextResponse.json({ error: "Stripe signature missing" }, { status: 400 });
+  let stripeEvent: Stripe.Event;
+  try { stripeEvent = new Stripe(key).webhooks.constructEvent(await request.text(), signature, secret); } catch { return NextResponse.json({ error: "Stripe signature verification failed" }, { status: 400 }); }
+  if (stripeEvent.type !== "checkout.session.completed") return NextResponse.json({ received: true });
+  const checkout = stripeEvent.data.object as Stripe.Checkout.Session;
+  const metadata = checkout.metadata ?? {};
+  const event: TrackedEvent = { event: "subscription_started", properties: { checkout_session_id: checkout.id, offer_id: metadata.offer_id, value: checkout.amount_total ? checkout.amount_total / 100 : undefined, currency: checkout.currency }, context: { eventId: `stripe_${stripeEvent.id}`, occurredAt: new Date(stripeEvent.created * 1_000).toISOString(), productId: metadata.product_id ?? "unknown", funnelId: metadata.funnel_id ?? "unknown", funnelVersion: "server", sessionId: metadata.funnel_session_id ?? checkout.id, assignments: metadata.experiment_assignments ? JSON.parse(metadata.experiment_assignments) : {}, attribution: metadata.attribution ? JSON.parse(metadata.attribution) : { firstTouch: {}, currentTouch: {} }, clientUserAgent: metadata.browser_user_agent, identity: { email: checkout.customer_details?.email ?? undefined } } };
+  await serverAnalytics.deliver(event);
+  return NextResponse.json({ received: true });
+}
