@@ -12,9 +12,9 @@
     "shipflow:upgrade": "shipflow upgrade"
   },
   "dependencies": {
-    "@aganoob/analytics": "^1.0.0",
+    "@aganoob/analytics": "^2.0.0",
     "@aganoob/attribution": "^1.0.0",
-    "@aganoob/cli": "^1.0.1",
+    "@aganoob/cli": "^2.0.0",
     "@aganoob/components": "^1.0.0",
     "@aganoob/core": "^1.0.0",
     "@aganoob/experiments": "^1.0.0",

@@ -9,14 +9,14 @@ importers:
   .:
     dependencies:
       '@aganoob/analytics':
-        specifier: ^1.0.0
-        version: 1.0.0
+        specifier: ^2.0.0
+        version: 2.0.0
       '@aganoob/attribution':
         specifier: ^1.0.0
         version: 1.0.0
       '@aganoob/cli':
-        specifier: ^1.0.1
-        version: 1.0.1
+        specifier: ^2.0.0
+        version: 2.0.0
       '@aganoob/components':
         specifier: ^1.0.0
         version: 1.0.0(@aganoob/core@1.0.0(react@19.2.8))(react@19.2.8)
@@ -66,14 +66,14 @@ importers:
 
 packages:
 
-  '@aganoob/analytics@1.0.0':
-    resolution: {integrity: sha512-vj4EbS8mebbKe+0n3mWQ7O/dy/4Atsnh0DQTbE7ct9TD1hle5w7qPmOvG5yRp0E4aiDdwAmo7p2h4/MhGD2SyQ==, tarball: https://npm.pkg.github.com/download/@aganoob/analytics/1.0.0/2dadf22cfef89e2b8ec7e3db345474a84570158f}
+  '@aganoob/analytics@2.0.0':
+    resolution: {integrity: sha512-C13ZUq/9Xye9wJNrMjDqjSg6RVfzmpg53UVS0slyAOaN/J8nC0QyQBz2WYzwuRjLOVRt86mI6YStQVG2lCy4Hg==, tarball: https://npm.pkg.github.com/download/@aganoob/analytics/2.0.0/2c5bff24ddcb674dd472aff62406e973e6881bc4}
 
   '@aganoob/attribution@1.0.0':
     resolution: {integrity: sha512-wugSCrm2z/tA+JydsYsozHpkAhzz0CQG8AXhLo6U3VZxMHq26mWQrHmpHZNowmaqKXKlUzKpb60ej5+UGytzRg==, tarball: https://npm.pkg.github.com/download/@aganoob/attribution/1.0.0/933414fee564c66683cf59060d9d16254142049f}
 
-  '@aganoob/cli@1.0.1':
-    resolution: {integrity: sha512-0XSvcK60ZkfDY8diXoazkVocguT58OAB5GuWJ92BmJ447m6r03jYtR2uUtRLwJFEKF+xvgwg0uez33llml017w==, tarball: https://npm.pkg.github.com/download/@aganoob/cli/1.0.1/fda28d87b423d0e0f01d4dab2ba7662caee2f1ef}
+  '@aganoob/cli@2.0.0':
+    resolution: {integrity: sha512-V6QBl183FhocqSHs8gMGxXvIlS2VtySio1kshjhEyWUkZZca/m/ZITz6Yi5b023Yn5g9dj7Z+HXHH9OyBlAjXQ==, tarball: https://npm.pkg.github.com/download/@aganoob/cli/2.0.0/6209f01564d7ca96ce923470f3638911d39d7c06}
     engines: {node: '>=22'}
     hasBin: true
 
@@ -459,11 +459,11 @@ packages:
   '@posthog/browser-common@0.5.0':
     resolution: {integrity: sha512-8DaxVZS1bQPbA514RePurLNbYjei3P4jhnC206DwVv5XThmZM3QdlsXenI2ujE3pLbgQ79hYn9o1Kda8I3WK/Q==}
 
-  '@posthog/core@1.48.8':
-    resolution: {integrity: sha512-LAOBOjMQrQmgcbZxnubl74l2GQd5OWqxCJJ8mzcWdZRWbfO6Y/A6E3fqWjDtm68hY4LxC/bbopG60cxZW8cfWw==}
+  '@posthog/core@1.48.9':
+    resolution: {integrity: sha512-jKJyG12L0TcLaa0av6lmSl8pLANUmvp2RVebM0/FYa/gID47BAVzuj3fT6QPJ7RZe0U4QZGQIrkB1amVYfBcig==}
 
-  '@posthog/types@1.405.1':
-    resolution: {integrity: sha512-JvaR4ChUKUk7qSTG58vKN2Br6es9riFF5mvlu7YGcwbB476vfyTO0o/TBh+zE88QhsfxnE5Tr/jKxI+e1v3Q5A==}
+  '@posthog/types@1.405.2':
+    resolution: {integrity: sha512-NVsw5pER9YEDFOfvmbpyRtIgv+0411QXHg1IjCFh+EcxtmLUP2FdJyiWYVpNM6WhTTlrPEW+fPZpGz1OBXijvQ==}
 
   '@rollup/rollup-android-arm-eabi@4.62.5':
     resolution: {integrity: sha512-jfkGfTwhQpsiSckPF8r9bU3pn3vyd72NlWaO+TgEO6WPSDnUhXzrNYCHBMOYj0ACaUgjm6eERLF+XV9a6RstoA==}
@@ -840,8 +840,8 @@ packages:
     resolution: {integrity: sha512-u82N74LFzG8ca+dD8puPnplTXoGH4fTPpVGuIbt36G3qvNlkvfD0lEAZSxaly3KX8TS/L1A1gsCEmvKmBcVbkQ==}
     engines: {node: ^10 || ^12 || >=14}
 
-  posthog-js@1.418.11:
-    resolution: {integrity: sha512-pthAWcPDt2m++m1x9fn2y1uxTE6MM+BF2hegWjgPsvgEMZqaihhxOQRGxqTQy2+TMWp1ut/CRb2UqtsTJ84/Tg==}
+  posthog-js@1.418.13:
+    resolution: {integrity: sha512-EwBi0M3sn8Hmes6Iu1Oav65+COt6fUL+eSC50lz1eSfABWsNxQndWT1LjxYd6nxvMUnV3NJkcZTeRor4lOENXw==}
 
   preact@10.29.8:
     resolution: {integrity: sha512-ej2aVZ+vZ8WO7tvlQWRM9N63A0KzF9q4mWJfDUHgYaIofWY9hu74QdnQrjoPMmZi2/nZ5gN0bJCQF49xQqx09Q==}
@@ -1052,16 +1052,16 @@ packages:
 
 snapshots:
 
-  '@aganoob/analytics@1.0.0':
+  '@aganoob/analytics@2.0.0':
     dependencies:
       '@aganoob/attribution': 1.0.0
-      posthog-js: 1.418.11
+      posthog-js: 1.418.13
     transitivePeerDependencies:
       - preact-render-to-string
 
   '@aganoob/attribution@1.0.0': {}
 
-  '@aganoob/cli@1.0.1': {}
+  '@aganoob/cli@2.0.0': {}
 
   '@aganoob/components@1.0.0(@aganoob/core@1.0.0(react@19.2.8))(react@19.2.8)':
     dependencies:
@@ -1295,14 +1295,14 @@ snapshots:
 
   '@posthog/browser-common@0.5.0':
     dependencies:
-      '@posthog/core': 1.48.8
-      '@posthog/types': 1.405.1
+      '@posthog/core': 1.48.9
+      '@posthog/types': 1.405.2
 
-  '@posthog/core@1.48.8':
+  '@posthog/core@1.48.9':
     dependencies:
-      '@posthog/types': 1.405.1
+      '@posthog/types': 1.405.2
 
-  '@posthog/types@1.405.1': {}
+  '@posthog/types@1.405.2': {}
 
   '@rollup/rollup-android-arm-eabi@4.62.5':
     optional: true
@@ -1641,11 +1641,11 @@ snapshots:
       picocolors: 1.1.1
       source-map-js: 1.2.1
 
-  posthog-js@1.418.11:
+  posthog-js@1.418.13:
     dependencies:
       '@posthog/browser-common': 0.5.0
-      '@posthog/core': 1.48.8
-      '@posthog/types': 1.405.1
+      '@posthog/core': 1.48.9
+      '@posthog/types': 1.405.2
       core-js: 3.50.0
       dompurify: 3.4.14
       fflate: 0.4.9
