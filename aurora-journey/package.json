@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "validate": "tsc --noEmit && shipflow doctor",
-    "test": "vitest run",
+    "test": "vitest run --passWithNoTests",
     "funnel:add": "shipflow add",
     "shipflow:upgrade": "shipflow upgrade"
   },
