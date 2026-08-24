@@ -1,0 +1,5 @@
+import { NextResponse } from "next/server";
+import Stripe from "stripe";
+import { checkoutMetadata, type CheckoutInput } from "@aganoob/payments";
+import { productById } from "../../../lib/products";
+export async function POST(request: Request) { const input = await request.json() as CheckoutInput; const product = productById(input.productId); const offer = product?.offers[input.offerId]; if (!product || !offer || !input.sessionId) return NextResponse.json({ error: "Unknown checkout" }, { status: 400 }); const origin = process.env.NEXT_PUBLIC_APP_URL ?? new URL(request.url).origin; const key = process.env.STRIPE_SECRET_KEY; if (!key?.trim()) return NextResponse.json({ url: `${origin}/?checkout=mock`, mocked: true }); const stripe = new Stripe(key); const session = await stripe.checkout.sessions.create({ mode: "subscription", line_items: [{ price: offer.stripePriceId, quantity: 1 }], success_url: `${origin}/?checkout=success`, cancel_url: `${origin}/?checkout=cancelled`, metadata: checkoutMetadata(input) }); return NextResponse.json({ url: session.url }); }
