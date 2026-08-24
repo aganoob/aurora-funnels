@@ -15,8 +15,8 @@ importers:
         specifier: ^1.0.0
         version: 1.0.0
       '@aganoob/cli':
-        specifier: ^1.0.0
-        version: 1.0.0
+        specifier: ^1.0.1
+        version: 1.0.1
       '@aganoob/components':
         specifier: ^1.0.0
         version: 1.0.0(@aganoob/core@1.0.0(react@19.2.8))(react@19.2.8)
@@ -72,8 +72,8 @@ packages:
   '@aganoob/attribution@1.0.0':
     resolution: {integrity: sha512-wugSCrm2z/tA+JydsYsozHpkAhzz0CQG8AXhLo6U3VZxMHq26mWQrHmpHZNowmaqKXKlUzKpb60ej5+UGytzRg==, tarball: https://npm.pkg.github.com/download/@aganoob/attribution/1.0.0/933414fee564c66683cf59060d9d16254142049f}
 
-  '@aganoob/cli@1.0.0':
-    resolution: {integrity: sha512-PuCJwzNNRbYpa1x/Uy90lpn3ITVCDjKrfo++ZoTeljSBVFPOa8/XbUu1qETMW0cbVUOKEyUXzr/FZqRhWosSnQ==, tarball: https://npm.pkg.github.com/download/@aganoob/cli/1.0.0/24586426da090e8beadcbe8669b087127260a05d}
+  '@aganoob/cli@1.0.1':
+    resolution: {integrity: sha512-0XSvcK60ZkfDY8diXoazkVocguT58OAB5GuWJ92BmJ447m6r03jYtR2uUtRLwJFEKF+xvgwg0uez33llml017w==, tarball: https://npm.pkg.github.com/download/@aganoob/cli/1.0.1/fda28d87b423d0e0f01d4dab2ba7662caee2f1ef}
     engines: {node: '>=22'}
     hasBin: true
 
@@ -1061,7 +1061,7 @@ snapshots:
 
   '@aganoob/attribution@1.0.0': {}
 
-  '@aganoob/cli@1.0.0': {}
+  '@aganoob/cli@1.0.1': {}
 
   '@aganoob/components@1.0.0(@aganoob/core@1.0.0(react@19.2.8))(react@19.2.8)':
     dependencies:
