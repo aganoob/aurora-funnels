@@ -1,0 +1,8 @@
+{
+  "sdkVersion": "latest",
+  "preset": "next-docker-nginx",
+  "migrations": [
+    "upgrade:latest",
+    "meta-v2"
+  ]
+}
