@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@aganoob/analytics": "^2.0.1",
+    "@aganoob/analytics-delivery": "^1.0.0",
     "@aganoob/analytics-meta": "^2.0.2",
     "@aganoob/attribution": "^1.0.0",
     "@aganoob/cli": "^2.0.2",
