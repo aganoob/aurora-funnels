@@ -33,7 +33,7 @@ export async function POST(request: Request) {
       mode: "subscription",
       line_items: [{ price: offer.stripePriceId, quantity: 1 }],
       customer_email: input.email,
-      success_url: `${origin}/?checkout=success`,
+      success_url: `${origin}/thank-you?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${origin}/?checkout=cancelled`,
       metadata: { ...checkoutMetadata(input), offer_id: input.offerId },
     });

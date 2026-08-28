@@ -49,4 +49,17 @@ describe("checkout route", () => {
     expect(response.status).toBe(502);
     await expect(response.json()).resolves.toEqual({ error: "Checkout is temporarily unavailable", code: "payment_provider_error" });
   });
+
+  it("returns customers to the thank-you page after a successful checkout", async () => {
+    vi.stubEnv("STRIPE_SECRET_KEY", "sk_test_example");
+    productById.mockReturnValue({ offers: { annual: { stripePriceId: "price_annual" } } });
+    create.mockResolvedValue({ id: "cs_test_123", url: "https://checkout.stripe.com/c/pay/cs_test_123" });
+
+    const response = await POST(requestFor());
+
+    expect(response.status).toBe(200);
+    expect(create).toHaveBeenCalledWith(expect.objectContaining({
+      success_url: "http://localhost:3000/thank-you?session_id={CHECKOUT_SESSION_ID}",
+    }));
+  });
 });
