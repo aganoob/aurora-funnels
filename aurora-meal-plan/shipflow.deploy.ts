@@ -1,20 +1,16 @@
 import { defineDeploymentConfig } from "@aganoob/deployment";
-import { gcpVm } from "@aganoob/deployment-gcp-vm";
+import { gcpAnalyticsDelivery, gcpCloudRun } from "@aganoob/deployment-gcp-cloud-run";
 
 export default defineDeploymentConfig({
-  hosts: {
-    production: gcpVm({
-      projectId: "aurora-funnels",
-      zone: "europe-west2-a",
-      name: "aurora-meal-production",
-      machineType: "auto",
-    }),
-  },
   environments: {
     production: {
-      host: "production",
+      target: gcpCloudRun({
+        projectId: "aurora-funnels",
+        region: "europe-west2",
+        service: "aurora-meal-production",
+      }),
       domains: { primary: "aurora-meal.maratz.dev", aliases: [] },
-      delivery: { mode: "postgres" },
+      analyticsDelivery: gcpAnalyticsDelivery({ contextTtlDays: 7 }),
     },
   },
 });
