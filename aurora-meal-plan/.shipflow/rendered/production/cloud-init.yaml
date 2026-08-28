@@ -1,0 +1,28 @@
+#cloud-config
+package_update: true
+packages: [docker.io, docker-compose-v2]
+write_files:
+  - path: /etc/systemd/system/shipflow-production.service
+    permissions: '0644'
+    content: |
+      [Unit]
+      Requires=docker.service
+      After=docker.service
+      [Service]
+      WorkingDirectory=/opt/shipflow/production
+      ExecStart=/usr/bin/docker compose --env-file /etc/shipflow/production/production.env up -d
+      ExecStop=/usr/bin/docker compose --env-file /etc/shipflow/production/production.env down
+      RemainAfterExit=yes
+      [Install]
+      WantedBy=multi-user.target
+runcmd:
+  - mkdir -p /opt/shipflow/production /etc/shipflow/production /mnt/disks/shipflow-postgres
+  - |
+      disk=/dev/disk/by-id/google-shipflow-postgres-data
+      until [ -b "$disk" ]; do sleep 1; done
+      if ! blkid "$disk" >/dev/null; then mkfs.ext4 -F "$disk"; fi
+      uuid=$(blkid -s UUID -o value "$disk")
+      grep -q " /mnt/disks/shipflow-postgres " /etc/fstab || echo "UUID=$uuid /mnt/disks/shipflow-postgres ext4 defaults,nofail 0 2" >> /etc/fstab
+      mount /mnt/disks/shipflow-postgres
+      mkdir -p /mnt/disks/shipflow-postgres/production
+  - systemctl daemon-reload

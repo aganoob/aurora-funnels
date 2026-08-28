@@ -10,25 +10,31 @@ importers:
     dependencies:
       '@aganoob/analytics':
         specifier: ^2.0.1
-        version: 2.0.1
+        version: 2.0.1(@types/react@19.2.18)(react@19.2.8)
       '@aganoob/analytics-delivery':
         specifier: ^1.0.0
-        version: 1.0.0
+        version: 1.0.0(@types/react@19.2.18)(react@19.2.8)
       '@aganoob/analytics-meta':
         specifier: ^2.0.2
-        version: 2.0.2
+        version: 2.0.2(@types/react@19.2.18)(react@19.2.8)
       '@aganoob/attribution':
         specifier: ^1.0.0
         version: 1.0.0
       '@aganoob/cli':
-        specifier: ^2.0.2
-        version: 2.0.2
+        specifier: ^2.1.0
+        version: 2.1.0
       '@aganoob/components':
         specifier: ^1.0.0
         version: 1.0.0(@aganoob/core@1.0.0(react@19.2.8))(react@19.2.8)
       '@aganoob/core':
         specifier: ^1.0.0
         version: 1.0.0(react@19.2.8)
+      '@aganoob/deployment':
+        specifier: ^1.1.0
+        version: 1.1.0
+      '@aganoob/deployment-gcp-vm':
+        specifier: ^1.1.0
+        version: 1.1.0
       '@aganoob/experiments':
         specifier: ^1.0.0
         version: 1.0.0
@@ -85,8 +91,8 @@ packages:
   '@aganoob/attribution@1.0.0':
     resolution: {integrity: sha512-wugSCrm2z/tA+JydsYsozHpkAhzz0CQG8AXhLo6U3VZxMHq26mWQrHmpHZNowmaqKXKlUzKpb60ej5+UGytzRg==, tarball: https://npm.pkg.github.com/download/@aganoob/attribution/1.0.0/933414fee564c66683cf59060d9d16254142049f}
 
-  '@aganoob/cli@2.0.2':
-    resolution: {integrity: sha512-ExMa9jf/LtKIhfSjvOOCWiALNPx0rQp6c5ObAdwybhbcBSIDKGMr0kEpaI8we56zt72+8bqcf1MhOjdofpVMGw==, tarball: https://npm.pkg.github.com/download/@aganoob/cli/2.0.2/1d46b3ccecaac718263e2f437ffb34bee89740bd}
+  '@aganoob/cli@2.1.0':
+    resolution: {integrity: sha512-AF0wBmDABd1t5EkPbZxaXLT7fcZ11JuOyYumT7lyQFgxAy8n2/kvcxTspowo5XqBO9tfOu6cMgWhkIK3QacwaQ==, tarball: https://npm.pkg.github.com/download/@aganoob/cli/2.1.0/9a9206552d3bf3b62cd0349fb5109f3f3cb43af3}
     engines: {node: '>=22'}
     hasBin: true
 
@@ -100,6 +106,12 @@ packages:
     resolution: {integrity: sha512-ZHKnvINEXvPwkHEoLls8Vm0OK+nYoEKjoE04nmJPIDYMLOo4jacuBcauoI3K2TYRFgqbewytlj9xUxZ2HWd8ww==, tarball: https://npm.pkg.github.com/download/@aganoob/core/1.0.0/5d5fd7428933df616c0310756036a55b3dad4034}
     peerDependencies:
       react: ^19.0.0
+
+  '@aganoob/deployment-gcp-vm@1.1.0':
+    resolution: {integrity: sha512-t8AokP7K5gOc+ojHmozZAJkKpbVlHenwq+DE+U/Z2xjeUDv5J5iUaUvmvxkvzOvzCCrzHv9vIycICSBPEqzCCQ==, tarball: https://npm.pkg.github.com/download/@aganoob/deployment-gcp-vm/1.1.0/8efee419c8c6c6c6a3869b151bc98ea55c157778}
+
+  '@aganoob/deployment@1.1.0':
+    resolution: {integrity: sha512-n9MJseb5HFx86BB3IKdm5yrltTPFcGMPz37vV3kg88Pndjl+rm603+0H8dyjxNcFNUHh6p7cTFDPSphu+zNDuQ==, tarball: https://npm.pkg.github.com/download/@aganoob/deployment/1.1.0/d793745860bfd9139eabc309877767d85f2e56f5}
 
   '@aganoob/experiments@1.0.0':
     resolution: {integrity: sha512-CxBPGrYN9btTSdWtdR0KQ9TXnb8GCv261CY74T+nQ4POcYCfz1YYlsBrKJoHPDc53/wMfD+TXko4NoO4w1LLHA==, tarball: https://npm.pkg.github.com/download/@aganoob/experiments/1.0.0/25604a7a5f56cabc4700495b2a0a09199b39c0d4}
@@ -469,14 +481,14 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@posthog/browser-common@0.5.0':
-    resolution: {integrity: sha512-8DaxVZS1bQPbA514RePurLNbYjei3P4jhnC206DwVv5XThmZM3QdlsXenI2ujE3pLbgQ79hYn9o1Kda8I3WK/Q==}
+  '@posthog/browser-common@0.6.0':
+    resolution: {integrity: sha512-d6yBE7VeoU3JTpaab3CaCoDCseh0Ytx7sTe0v2ZxhtHNxoKk7rdqr92+bUz9F1T2CuJO5/OTkes4HWT2VHNrTA==}
 
-  '@posthog/core@1.48.10':
-    resolution: {integrity: sha512-Y70zhdQFNMwHHZk9MW44MJUR1DyFm0Cn3DOtd+wQYnGv+kX+qc6CA+pBtEmZe2XD0K9uuOKiz2LJwzaq/wz0FA==}
+  '@posthog/core@1.48.11':
+    resolution: {integrity: sha512-fvKbxGaUM8RuCDB1jdhSqAHYjk42INfJDWT1KVezn74sCrfnr1YaUafxzmcS+87D5FzbA2tu7IT0GQRV2WkkRg==}
 
-  '@posthog/types@1.405.2':
-    resolution: {integrity: sha512-NVsw5pER9YEDFOfvmbpyRtIgv+0411QXHg1IjCFh+EcxtmLUP2FdJyiWYVpNM6WhTTlrPEW+fPZpGz1OBXijvQ==}
+  '@posthog/types@1.406.1':
+    resolution: {integrity: sha512-RhA00AvWrcEW3wbYgvIPr4EeUTu1BDHJx8eajwJ1moOYIchQtgkQcqgnUjwXz6jL1a8XJAIaZ9w7SZfYo1b/Rw==}
 
   '@rollup/rollup-android-arm-eabi@4.62.5':
     resolution: {integrity: sha512-jfkGfTwhQpsiSckPF8r9bU3pn3vyd72NlWaO+TgEO6WPSDnUhXzrNYCHBMOYj0ACaUgjm6eERLF+XV9a6RstoA==}
@@ -903,8 +915,16 @@ packages:
     resolution: {integrity: sha512-9ZhXKM/rw350N1ovuWHbGxnGh/SNJ4cnxHiM0rxE4VN41wsg8P8zWn9hv/buK00RP4WvlOyr/RBDiptyxVbkZQ==}
     engines: {node: '>=0.10.0'}
 
-  posthog-js@1.418.14:
-    resolution: {integrity: sha512-XrSKP1HALRVJjJd26qXq8kKi0aO5rp7uIX4nbJ1rhH7KLh/rDUlVysnm+EuTUxLXcV/gQpl9nzENF2R+IvWmNg==}
+  posthog-js@1.419.4:
+    resolution: {integrity: sha512-SpEgcWtHZ54HxtWl5jCxjHiG9C6t90iQVIra1T+U3veN9Q8vNx3yYsUuEV+dNF6g4M7HeV8Y1ZpNlTalWI8EYw==}
+    peerDependencies:
+      '@types/react': '>=16.8.0'
+      react: '>=16.8.0'
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+      react:
+        optional: true
 
   preact@10.29.8:
     resolution: {integrity: sha512-ej2aVZ+vZ8WO7tvlQWRM9N63A0KzF9q4mWJfDUHgYaIofWY9hu74QdnQrjoPMmZi2/nZ5gN0bJCQF49xQqx09Q==}
@@ -1123,32 +1143,41 @@ packages:
 
 snapshots:
 
-  '@aganoob/analytics-delivery@1.0.0':
+  '@aganoob/analytics-delivery@1.0.0(@types/react@19.2.18)(react@19.2.8)':
     dependencies:
-      '@aganoob/analytics': 2.0.1
+      '@aganoob/analytics': 2.0.1(@types/react@19.2.18)(react@19.2.8)
       '@aganoob/attribution': 1.0.0
       pg: 8.23.0
     transitivePeerDependencies:
+      - '@types/react'
       - pg-native
       - preact-render-to-string
+      - react
 
-  '@aganoob/analytics-meta@2.0.2':
+  '@aganoob/analytics-meta@2.0.2(@types/react@19.2.18)(react@19.2.8)':
     dependencies:
-      '@aganoob/analytics': 2.0.1
+      '@aganoob/analytics': 2.0.1(@types/react@19.2.18)(react@19.2.8)
       '@aganoob/attribution': 1.0.0
     transitivePeerDependencies:
+      - '@types/react'
       - preact-render-to-string
+      - react
 
-  '@aganoob/analytics@2.0.1':
+  '@aganoob/analytics@2.0.1(@types/react@19.2.18)(react@19.2.8)':
     dependencies:
       '@aganoob/attribution': 1.0.0
-      posthog-js: 1.418.14
+      posthog-js: 1.419.4(@types/react@19.2.18)(react@19.2.8)
     transitivePeerDependencies:
+      - '@types/react'
       - preact-render-to-string
+      - react
 
   '@aganoob/attribution@1.0.0': {}
 
-  '@aganoob/cli@2.0.2': {}
+  '@aganoob/cli@2.1.0':
+    dependencies:
+      '@aganoob/deployment': 1.1.0
+      '@aganoob/deployment-gcp-vm': 1.1.0
 
   '@aganoob/components@1.0.0(@aganoob/core@1.0.0(react@19.2.8))(react@19.2.8)':
     dependencies:
@@ -1158,6 +1187,12 @@ snapshots:
   '@aganoob/core@1.0.0(react@19.2.8)':
     dependencies:
       react: 19.2.8
+
+  '@aganoob/deployment-gcp-vm@1.1.0':
+    dependencies:
+      '@aganoob/deployment': 1.1.0
+
+  '@aganoob/deployment@1.1.0': {}
 
   '@aganoob/experiments@1.0.0': {}
 
@@ -1380,16 +1415,16 @@ snapshots:
   '@next/swc-win32-x64-msvc@15.5.23':
     optional: true
 
-  '@posthog/browser-common@0.5.0':
+  '@posthog/browser-common@0.6.0':
     dependencies:
-      '@posthog/core': 1.48.10
-      '@posthog/types': 1.405.2
+      '@posthog/core': 1.48.11
+      '@posthog/types': 1.406.1
 
-  '@posthog/core@1.48.10':
+  '@posthog/core@1.48.11':
     dependencies:
-      '@posthog/types': 1.405.2
+      '@posthog/types': 1.406.1
 
-  '@posthog/types@1.405.2': {}
+  '@posthog/types@1.406.1': {}
 
   '@rollup/rollup-android-arm-eabi@4.62.5':
     optional: true
@@ -1773,11 +1808,11 @@ snapshots:
     dependencies:
       xtend: 4.0.2
 
-  posthog-js@1.418.14:
+  posthog-js@1.419.4(@types/react@19.2.18)(react@19.2.8):
     dependencies:
-      '@posthog/browser-common': 0.5.0
-      '@posthog/core': 1.48.10
-      '@posthog/types': 1.405.2
+      '@posthog/browser-common': 0.6.0
+      '@posthog/core': 1.48.11
+      '@posthog/types': 1.406.1
       core-js: 3.50.0
       dompurify: 3.4.14
       fflate: 0.4.9
@@ -1785,6 +1820,9 @@ snapshots:
       query-selector-shadow-dom: 1.0.1
       web-vitals: 5.3.0
       web-vitals-soft-navs: web-vitals@6.0.0
+    optionalDependencies:
+      '@types/react': 19.2.18
+      react: 19.2.8
     transitivePeerDependencies:
       - preact-render-to-string
 

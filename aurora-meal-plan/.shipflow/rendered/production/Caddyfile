@@ -1,0 +1,16 @@
+aurora-meal.maratz.dev {
+  encode zstd gzip
+  request_body { max_size 1MB }
+  @static_production path /_next/static/*
+  handle @static_production {
+    header Cache-Control "public, immutable, max-age=604800"
+    reverse_proxy production-web:3000
+  }
+  reverse_proxy production-web:3000 {
+    header_up Host {host}
+    header_up X-Real-IP {remote_host}
+    header_up X-Forwarded-For {client_ip}
+    header_up X-Forwarded-Proto {scheme}
+    transport http { read_timeout 60s }
+  }
+}

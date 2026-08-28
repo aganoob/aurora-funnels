@@ -1,6 +1,6 @@
 import { defineMetaConfig } from "@aganoob/analytics-meta";
 
-export const shipflowConfig = { sdkVersion: "1.0.0", preset: "next-docker-nginx", domains: ["aurora-meal.maratz.dev"] ,
+export const shipflowConfig = { sdkVersion: "1.0.0", preset: "next-docker-caddy", domains: ["aurora-meal.maratz.dev"] ,
   analytics: {
     meta: defineMetaConfig({
       datasetId: process.env.NEXT_PUBLIC_META_DATASET_ID,

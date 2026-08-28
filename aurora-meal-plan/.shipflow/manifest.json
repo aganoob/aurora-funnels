@@ -3,6 +3,7 @@
   "preset": "next-docker-nginx",
   "migrations": [
     "upgrade:latest",
-    "meta-v2"
+    "meta-v2",
+    "proxy-caddy-v1"
   ]
 }
