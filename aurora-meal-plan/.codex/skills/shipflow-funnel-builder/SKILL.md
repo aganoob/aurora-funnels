@@ -26,7 +26,7 @@ Determine which of these requests you have before editing:
 
 | Request | Primary location | Expected work |
 | --- | --- | --- |
-| New product or price | `lib/products.ts` | Add a product, offers, domain, and environment-backed Stripe price IDs. |
+| New product or price | `lib/products.ts` | Add a product, offers, domain, and environment-backed provider catalog references. |
 | New flow for an existing product | `funnels/catalog.tsx` | Compose semantic screens and register the funnel. |
 | New screen treatment | Funnel catalog first; shared package when reusable | Write a React screen component and define its semantic role. |
 | Repeated UI or sequence | `packages/funnel-components` or `packages/funnel-patterns` | Promote it, export it, and add registry metadata. |
@@ -166,6 +166,11 @@ export const atlasSleep = defineFunnel({
   productId: "atlas-sleep",
   domains: ["sleep.example.com"],
   defaultOffer: "annual",
+  checkoutOffers: ["annual", "quarterly"],
+  checkoutRoutes: {
+    annual: { paid: "success", trialing: "success" },
+    quarterly: { paid: "success", trialing: "success" },
+  },
   screens: [
     defineScreen({ id: "welcome", type: "landing", component: Welcome }),
     defineScreen({ id: "sleep-goal", type: "quiz_question", component: SleepGoal, output: { field: "sleep_goal" } }),
@@ -260,10 +265,27 @@ export const atlasSleepProduct = defineProduct({
   },
   offers: {
     annual: {
-      stripePriceId: process.env.STRIPE_PRICE_ATLAS_SLEEP_ANNUAL ?? "price_placeholder_annual",
       label: "Annual membership",
       amount: 4900,
       currency: "usd",
+      payment: {
+        provider: "stripe",
+        catalogReference: process.env.STRIPE_PRICE_ATLAS_SLEEP_ANNUAL ?? "price_placeholder_annual",
+        presentation: "embedded",
+        allowPromotionCodes: true,
+      },
+    },
+    quarterly: {
+      label: "Quarterly membership",
+      amount: 2900,
+      currency: "usd",
+      payment: {
+        provider: "stripe",
+        catalogReference: process.env.STRIPE_PRICE_ATLAS_SLEEP_QUARTERLY ?? "price_placeholder_quarterly",
+        presentation: "embedded",
+        discountReference: process.env.STRIPE_COUPON_ATLAS_SLEEP_INTRO,
+        trialDays: 7,
+      },
     },
   },
 });
@@ -277,7 +299,13 @@ Keep these identifiers aligned:
 | `funnel.defaultOffer` and `checkout("…")` | An offer key on that product. |
 | `funnel.domains` | The host routing configuration and deployed domain. |
 | `ProductDefinition.domains` | The funnel domain(s) for the product. |
-| `stripePriceId` | The server-side Stripe configuration for the intended environment. |
+| `checkoutOffers` | The offers a funnel may send to checkout. |
+| `checkoutRoutes` | The destination screen for each verified payment outcome. |
+| `payment.catalogReference` | The server-side provider price or catalog configuration for the intended environment. |
+
+`payment.presentation` supports `"embedded"` and `"redirect"`. An offer can enable provider-managed promotion-code entry with `allowPromotionCodes`, apply a configured discount with `discountReference`, and start a subscription trial with `trialDays`. One offer uses either a pre-applied discount or customer-entered promotion codes. A paywall with several plans calls `checkout` with the selected offer ID; server validation confines the request to the funnel’s `checkoutOffers` list.
+
+The funnel calls only the shared `checkout(offerId)` contract. Provider-specific work lives behind the payment-provider registry. Adding Paddle or another processor means adding a server provider adapter, a browser checkout renderer when needed, and product offers that select that provider. Funnels, canonical events, offer selection, and outcome routes remain unchanged.
 
 Use `NEXT_PUBLIC_*` only for browser-safe configuration. Store Stripe secret keys, webhook secrets, provider API keys, and backend webhook secrets in server environment variables. Keep secrets out of funnel source, client components, and product configuration.
 
@@ -285,7 +313,7 @@ Use `NEXT_PUBLIC_*` only for browser-safe configuration. Store Stripe secret key
 
 When a project needs Meta Pixel and Conversions API, run `pnpm shipflow meta setup`. It writes the browser-safe Dataset ID and server-only CAPI token to `.env.local`, then configures Meta Test Events mode. Follow with `pnpm shipflow meta doctor` and `pnpm shipflow meta test`; ask the user to confirm the test event in Meta Events Manager. Shipflow 1.x projects use `pnpm dlx @aganoob/cli@latest upgrade` from a clean worktree before setup. Keep the default Meta destination for ordinary projects. Use `destinations` and `routes` in `shipflow.config.ts` only when products or campaign funnels require separate Meta datasets.
 
-For confirmed web conversions, choose the application delivery driver in server configuration. Use `backend` when the product has a durable analytics endpoint; Shipflow sends signed, idempotent conversion-context and event requests to that endpoint. Use `postgres` for a standalone funnel; Shipflow keeps encrypted conversion contexts and queued jobs in Postgres. Run `pnpm shipflow delivery doctor` after configuring either driver. Funnel source stays provider-neutral in both cases.
+For confirmed web conversions, choose the analytics delivery service in deployment configuration. Browser-only delivery keeps Meta Pixel and PostHog Web active. An external service receives signed, idempotent conversion-context and event requests. The managed GCP delivery module keeps encrypted conversion contexts and queued jobs in Firestore and Cloud Tasks. Run `pnpm shipflow delivery doctor` after configuring a service. Funnel source stays provider-neutral.
 
 ## Preserve measurement, attribution, and checkout
 
@@ -323,7 +351,7 @@ The canonical event list is a vocabulary that requires explicit runtime instrume
 | Email screen appears or submits | `email_capture_viewed`, `email_submitted` | Consent state; keep email itself out of analytics properties. |
 | Result, paywall, or upsell appears | `result_viewed`, `paywall_viewed`, `upsell_viewed` | Offer ID or result category. |
 | A visitor chooses an offer | `offer_selected` | `offer_id`, amount, currency. |
-| Stripe redirect returns successfully | `checkout_completed` | Checkout session ID when available. |
+| A verified provider outcome is paid or trialing | `checkout_completed` | Provider, checkout reference, offer ID, amount, currency, and discount. |
 | Success screen completes the product journey | `funnel_completed` | Final screen ID. |
 
 Use one event per user-visible transition. React effects should guard against duplicate sends during state restoration, development rendering, and revisits unless repeat views are an intentional metric.
@@ -336,9 +364,11 @@ The helper captures UTM parameters, click IDs, referrer, landing URL, and Meta c
 
 ### Checkout and success
 
-Call `checkout(offerId)` from the paywall. The runtime sends `checkout_started`, calls `createCheckout`, and sends the visitor to the returned URL. The server validates the product and offer, captures server-trusted matching data, creates Stripe Checkout, and attaches the funnel session, product, offer, assignments, and an opaque conversion-context ID as metadata.
+Call `checkout(offerId)` from the paywall. The runtime records `offer_selected`, calls `createCheckout`, then records `checkout_started` after the payment session is created. The server validates the product, funnel, selected offer, eligibility, and provider capability. It creates a redirect URL or an embedded checkout presentation, then preserves the funnel session, product, offer, assignments, and an opaque conversion-context ID.
 
-The Stripe webhook is the source for confirmed `subscription_started`. It restores the conversion context and enqueues provider delivery through the configured driver. Treat a checkout redirect as an intent signal; keep fulfillment, provider forwarding, and backend delivery on the server after webhook verification. Never add raw email, phone, `fbclid`, `_fbp`, `_fbc`, IP address, or user agent to event properties or Stripe metadata.
+For Stripe, the browser renders the provider’s embedded Checkout form when the presentation is embedded. The return path queries the server for the normalized checkout outcome before it records `checkout_completed` or follows `checkoutRoutes`. `paid` and `trialing` can route to a success, upsell, or thank-you screen. `pending`, `failed`, and `cancelled` keep the visitor on the payment step with clear recovery feedback.
+
+Stripe’s signed webhook is the source for confirmed `subscription_started`; it restores the conversion context and enqueues configured provider delivery. Configure `checkout.session.completed` and `checkout.session.async_payment_succeeded` at the Stripe endpoint. Fulfillment, provider forwarding, and backend delivery continue on the server after webhook verification. Never add raw email, phone, `fbclid`, `_fbp`, `_fbc`, IP address, or user agent to event properties or provider metadata.
 
 ### Experiments
 
@@ -388,6 +418,8 @@ In a large workspace, run the relevant app build if the root build is outside th
 - Question answers appear in session state before their dependent route or result uses them.
 - Events use canonical names and carry the expected funnel, screen, session, assignment, and attribution context.
 - Mock checkout works with empty local secrets; real checkout stays behind server-side production configuration.
+- Every available plan has a displayed price, configured catalog reference, permitted checkout offer, and verified outcome route.
+- Embedded Stripe Checkout renders with `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`; configure the payment domain in Stripe before testing wallets on a production domain.
 - Stripe webhook verification and subscription delivery stay operational after product or offer changes.
 
 ## Delivery checklist
@@ -396,12 +428,12 @@ Before calling the funnel complete, confirm the following:
 
 - The funnel has a concise, evidence-backed promise and a visible audience fit.
 - Every screen has a semantic type, unique stable ID, and a clear primary action.
-- Product configuration holds domains, branding, offer labels, amounts, currencies, and environment-backed Stripe price IDs.
+- Product configuration holds domains, branding, offer labels, amounts, currencies, provider catalog references, discounts, trials, and presentation choices.
 - Reusable work is exported and registered only when it has a genuine second consumer.
 - Browser source emits canonical events through shared helpers.
 - Attribution, experiment assignments, session ID, and offer ID survive checkout.
 - Email capture uses `setIdentity`, follows the funnel’s consent requirements, and stays out of event properties.
-- Checkout and its webhook preserve an opaque conversion-context ID; durable delivery is configured through `backend` or `postgres`.
+- Checkout and its webhook preserve an opaque conversion-context ID; verified payment outcomes route through `checkoutRoutes`, and durable delivery is configured through an external or managed analytics delivery service.
 - Provider secrets and backend targets remain server-side.
 - The complete mobile journey, all branches, checkout fallback, and confirmation path have been exercised.
 - Validation, tests, and the relevant build pass.
@@ -419,8 +451,11 @@ The reference implementation is intentionally small and is the primary source fo
 - `packages/analytics-delivery/src` — encrypted conversion context, durable delivery adapters, and the Postgres worker.
 - `packages/attribution/src/index.ts` — first/current touch capture.
 - `packages/experiments/src/index.ts` — deterministic session assignment.
-- `packages/payments/src/index.ts` — checkout request and metadata contract.
+- `packages/payments/src/index.ts` — checkout request, presentation, outcome, provider-adapter, and metadata contracts.
 - `apps/web/funnels/catalog.tsx` — composed funnels, shared screens, and paywall experiment.
 - `apps/web/components/funnel-app.tsx` — session persistence and lifecycle integration.
-- `apps/web/lib/products.ts` — product and offer configuration.
-- `apps/web/app/api` — tracking, checkout, and verified payment delivery.
+- `apps/web/lib/products.ts` — product and provider-backed offer configuration.
+- `apps/web/lib/payments/providers.ts` — server payment-provider registry.
+- `apps/web/lib/payments/stripe.ts` — Stripe Checkout adapter and normalized verified outcomes.
+- `apps/web/components/provider-checkout.tsx` — browser payment-provider rendering seam.
+- `apps/web/app/api/payments` — checkout creation, verified status, and Stripe webhook delivery.

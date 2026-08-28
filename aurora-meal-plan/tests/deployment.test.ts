@@ -1,15 +1,15 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { gcpResourceNames } from "@aganoob/deployment-gcp-cloud-run";
 import { GET } from "../app/api/health/route";
 import { missingRuntimeConfiguration } from "../lib/runtime-config";
+import deploymentConfig from "../shipflow.deploy";
 
 describe("production runtime configuration", () => {
-  it("requires billing, delivery, and server analytics credentials in production", () => {
+  it("requires billing and server analytics credentials in production", () => {
     expect(missingRuntimeConfiguration({ NODE_ENV: "production" })).toEqual([
-      "DATABASE_URL",
       "META_CAPI_ACCESS_TOKEN",
       "NEXT_PUBLIC_APP_URL",
       "POSTHOG_PROJECT_API_KEY",
-      "SHIPFLOW_DELIVERY_ENCRYPTION_KEY",
       "STRIPE_PRICE_AURORA_MEAL_PLAN_ANNUAL",
       "STRIPE_SECRET_KEY",
       "STRIPE_WEBHOOK_SECRET",
@@ -18,6 +18,24 @@ describe("production runtime configuration", () => {
 
   it("allows local development without production credentials", () => {
     expect(missingRuntimeConfiguration({ NODE_ENV: "development" })).toEqual([]);
+  });
+});
+
+describe("staging deployment", () => {
+  it("uses an isolated public Cloud Run service without a custom domain", () => {
+    expect(deploymentConfig.environments.staging).toMatchObject({
+      target: {
+        projectId: "aurora-funnels",
+        region: "europe-west2",
+        service: "aurora-meal-staging",
+      },
+      analyticsDelivery: { kind: "browser-only" },
+    });
+    expect("domains" in deploymentConfig.environments.staging).toBe(false);
+
+    const names = gcpResourceNames("staging", deploymentConfig.environments.staging.target);
+    expect(names.buildServiceAccount).toHaveLength(30);
+    expect(names.funnelServiceAccount).toHaveLength(30);
   });
 });
 

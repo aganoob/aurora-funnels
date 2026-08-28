@@ -4,6 +4,14 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+patchedDependencies:
+  '@aganoob/cli@2.2.0':
+    hash: 6ce91133ca678d7b42adde6889a79d390b9229ab1aa7a73e8255ee58c5e07f60
+    path: patches/@aganoob__cli@2.2.0.patch
+  '@aganoob/deployment-gcp-cloud-run@2.2.0':
+    hash: 4142dd4cce36f2fefe71cba331d5843db6af1dabc2a62f115c67c2c335233c4e
+    path: patches/@aganoob__deployment-gcp-cloud-run@2.2.0.patch
+
 importers:
 
   .:
@@ -12,8 +20,8 @@ importers:
         specifier: ^2.0.1
         version: 2.0.1(@types/react@19.2.18)(react@19.2.8)
       '@aganoob/analytics-delivery':
-        specifier: ^1.0.0
-        version: 1.0.0(@types/react@19.2.18)(react@19.2.8)
+        specifier: ^2.2.0
+        version: 2.2.0(@types/react@19.2.18)(react@19.2.8)
       '@aganoob/analytics-meta':
         specifier: ^2.0.2
         version: 2.0.2(@types/react@19.2.18)(react@19.2.8)
@@ -21,8 +29,8 @@ importers:
         specifier: ^1.0.0
         version: 1.0.0
       '@aganoob/cli':
-        specifier: ^2.1.0
-        version: 2.1.0
+        specifier: ^2.2.0
+        version: 2.2.0(patch_hash=6ce91133ca678d7b42adde6889a79d390b9229ab1aa7a73e8255ee58c5e07f60)
       '@aganoob/components':
         specifier: ^1.0.0
         version: 1.0.0(@aganoob/core@1.0.0(react@19.2.8))(react@19.2.8)
@@ -30,11 +38,11 @@ importers:
         specifier: ^1.0.0
         version: 1.0.0(react@19.2.8)
       '@aganoob/deployment':
-        specifier: ^1.1.0
-        version: 1.1.0
-      '@aganoob/deployment-gcp-vm':
-        specifier: ^1.1.0
-        version: 1.1.0
+        specifier: ^2.2.0
+        version: 2.2.0
+      '@aganoob/deployment-gcp-cloud-run':
+        specifier: ^2.2.0
+        version: 2.2.0(patch_hash=4142dd4cce36f2fefe71cba331d5843db6af1dabc2a62f115c67c2c335233c4e)
       '@aganoob/experiments':
         specifier: ^1.0.0
         version: 1.0.0
@@ -78,8 +86,8 @@ importers:
 
 packages:
 
-  '@aganoob/analytics-delivery@1.0.0':
-    resolution: {integrity: sha512-nMxBtE0DPYc4kYVf6LNQCNLgIL1QX7NVs/A4PxSO4TiwxVneD+18HpGmQ+mdUCyopagY3GCwlOTEi4TmMohIWg==, tarball: https://npm.pkg.github.com/download/@aganoob/analytics-delivery/1.0.0/fe8d7987ca9c6830951ae9b3c0aa7dfc3330f717}
+  '@aganoob/analytics-delivery@2.2.0':
+    resolution: {integrity: sha512-y+dyVy3RC0EHhWOcA3vHNZxK2jgwTrsjohYHMq4zsFijPZi+DzypUZTVs8CKTU24klPz3FC6jOKtH8YVP2ovPQ==, tarball: https://npm.pkg.github.com/download/@aganoob/analytics-delivery/2.2.0/dfa084ef59de5dd449d006ce58052ee62a8f0f29}
     hasBin: true
 
   '@aganoob/analytics-meta@2.0.2':
@@ -91,8 +99,8 @@ packages:
   '@aganoob/attribution@1.0.0':
     resolution: {integrity: sha512-wugSCrm2z/tA+JydsYsozHpkAhzz0CQG8AXhLo6U3VZxMHq26mWQrHmpHZNowmaqKXKlUzKpb60ej5+UGytzRg==, tarball: https://npm.pkg.github.com/download/@aganoob/attribution/1.0.0/933414fee564c66683cf59060d9d16254142049f}
 
-  '@aganoob/cli@2.1.0':
-    resolution: {integrity: sha512-AF0wBmDABd1t5EkPbZxaXLT7fcZ11JuOyYumT7lyQFgxAy8n2/kvcxTspowo5XqBO9tfOu6cMgWhkIK3QacwaQ==, tarball: https://npm.pkg.github.com/download/@aganoob/cli/2.1.0/9a9206552d3bf3b62cd0349fb5109f3f3cb43af3}
+  '@aganoob/cli@2.2.0':
+    resolution: {integrity: sha512-N6s7jMvIJ/DDU1bHRLxgCQZEFio9dhgrOSydaRXocr076TP7E9ZrjWWz/+9zdr3bRhw3RrbFZIm8739b9jzO4Q==, tarball: https://npm.pkg.github.com/download/@aganoob/cli/2.2.0/3eafc1dfef80c16b3bc4f5f583aef7bc3c36cd22}
     engines: {node: '>=22'}
     hasBin: true
 
@@ -107,11 +115,11 @@ packages:
     peerDependencies:
       react: ^19.0.0
 
-  '@aganoob/deployment-gcp-vm@1.1.0':
-    resolution: {integrity: sha512-t8AokP7K5gOc+ojHmozZAJkKpbVlHenwq+DE+U/Z2xjeUDv5J5iUaUvmvxkvzOvzCCrzHv9vIycICSBPEqzCCQ==, tarball: https://npm.pkg.github.com/download/@aganoob/deployment-gcp-vm/1.1.0/8efee419c8c6c6c6a3869b151bc98ea55c157778}
+  '@aganoob/deployment-gcp-cloud-run@2.2.0':
+    resolution: {integrity: sha512-ElT6b8UPDksKgoW6XJ+8UwYrjm4yOrSyby4jAnx40QQZ31oo4CC28R2hujZXGScJ/uAMUn8Kx5PS1Ibi8eahcA==, tarball: https://npm.pkg.github.com/download/@aganoob/deployment-gcp-cloud-run/2.2.0/a80b48e40e767b2f832167adffd4b45a90fe1844}
 
-  '@aganoob/deployment@1.1.0':
-    resolution: {integrity: sha512-n9MJseb5HFx86BB3IKdm5yrltTPFcGMPz37vV3kg88Pndjl+rm603+0H8dyjxNcFNUHh6p7cTFDPSphu+zNDuQ==, tarball: https://npm.pkg.github.com/download/@aganoob/deployment/1.1.0/d793745860bfd9139eabc309877767d85f2e56f5}
+  '@aganoob/deployment@2.2.0':
+    resolution: {integrity: sha512-fChtq7CDJQ/3YZMb00cuj8rd6FjdPTljKOVbDSm4Lewop/9gZidn1L+wyuXlfssCTECZ3Pm+0Cx8osNCTraJXQ==, tarball: https://npm.pkg.github.com/download/@aganoob/deployment/2.2.0/5addbc0c7e271874483193da08ddfe58b3602917}
 
   '@aganoob/experiments@1.0.0':
     resolution: {integrity: sha512-CxBPGrYN9btTSdWtdR0KQ9TXnb8GCv261CY74T+nQ4POcYCfz1YYlsBrKJoHPDc53/wMfD+TXko4NoO4w1LLHA==, tarball: https://npm.pkg.github.com/download/@aganoob/experiments/1.0.0/25604a7a5f56cabc4700495b2a0a09199b39c0d4}
@@ -481,14 +489,14 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@posthog/browser-common@0.6.0':
-    resolution: {integrity: sha512-d6yBE7VeoU3JTpaab3CaCoDCseh0Ytx7sTe0v2ZxhtHNxoKk7rdqr92+bUz9F1T2CuJO5/OTkes4HWT2VHNrTA==}
+  '@posthog/browser-common@0.6.1':
+    resolution: {integrity: sha512-dhx4CFm9FnyfJYiEGFtH5HWvhDm/6zAUPUG+euDBO8rYE92fAoBtplmxoqe6E3RD49HyOIyDJv93iBwrcxxBrQ==}
 
-  '@posthog/core@1.48.11':
-    resolution: {integrity: sha512-fvKbxGaUM8RuCDB1jdhSqAHYjk42INfJDWT1KVezn74sCrfnr1YaUafxzmcS+87D5FzbA2tu7IT0GQRV2WkkRg==}
+  '@posthog/core@1.49.1':
+    resolution: {integrity: sha512-jdZh85tG56OXLH881CVwBZyiXCPPaZasfYeWwm9kVUvxC/Rb+lz7wYN9GuqSEmNPJgVnK4v8wS0bCaFc3OmVEA==}
 
-  '@posthog/types@1.406.1':
-    resolution: {integrity: sha512-RhA00AvWrcEW3wbYgvIPr4EeUTu1BDHJx8eajwJ1moOYIchQtgkQcqgnUjwXz6jL1a8XJAIaZ9w7SZfYo1b/Rw==}
+  '@posthog/types@1.407.0':
+    resolution: {integrity: sha512-7J/aFVi7JWFt/ekGVsMFvkTcADoE9MTNf1N9cpBSMUQ/SPLiBjbg386Fzk5OlgWG/u5OemBy4wlgD7YebqeppQ==}
 
   '@rollup/rollup-android-arm-eabi@4.62.5':
     resolution: {integrity: sha512-jfkGfTwhQpsiSckPF8r9bU3pn3vyd72NlWaO+TgEO6WPSDnUhXzrNYCHBMOYj0ACaUgjm6eERLF+XV9a6RstoA==}
@@ -915,8 +923,8 @@ packages:
     resolution: {integrity: sha512-9ZhXKM/rw350N1ovuWHbGxnGh/SNJ4cnxHiM0rxE4VN41wsg8P8zWn9hv/buK00RP4WvlOyr/RBDiptyxVbkZQ==}
     engines: {node: '>=0.10.0'}
 
-  posthog-js@1.419.4:
-    resolution: {integrity: sha512-SpEgcWtHZ54HxtWl5jCxjHiG9C6t90iQVIra1T+U3veN9Q8vNx3yYsUuEV+dNF6g4M7HeV8Y1ZpNlTalWI8EYw==}
+  posthog-js@1.422.1:
+    resolution: {integrity: sha512-T0jOnq85RV0tvlmoFTShqulU753Yd9v5QdfbT7mxZnloky9feTqtUULxl28KHQdhpbgfZnj4WJkMBXhNH2z+TA==}
     peerDependencies:
       '@types/react': '>=16.8.0'
       react: '>=16.8.0'
@@ -1143,7 +1151,7 @@ packages:
 
 snapshots:
 
-  '@aganoob/analytics-delivery@1.0.0(@types/react@19.2.18)(react@19.2.8)':
+  '@aganoob/analytics-delivery@2.2.0(@types/react@19.2.18)(react@19.2.8)':
     dependencies:
       '@aganoob/analytics': 2.0.1(@types/react@19.2.18)(react@19.2.8)
       '@aganoob/attribution': 1.0.0
@@ -1166,7 +1174,7 @@ snapshots:
   '@aganoob/analytics@2.0.1(@types/react@19.2.18)(react@19.2.8)':
     dependencies:
       '@aganoob/attribution': 1.0.0
-      posthog-js: 1.419.4(@types/react@19.2.18)(react@19.2.8)
+      posthog-js: 1.422.1(@types/react@19.2.18)(react@19.2.8)
     transitivePeerDependencies:
       - '@types/react'
       - preact-render-to-string
@@ -1174,10 +1182,10 @@ snapshots:
 
   '@aganoob/attribution@1.0.0': {}
 
-  '@aganoob/cli@2.1.0':
+  '@aganoob/cli@2.2.0(patch_hash=6ce91133ca678d7b42adde6889a79d390b9229ab1aa7a73e8255ee58c5e07f60)':
     dependencies:
-      '@aganoob/deployment': 1.1.0
-      '@aganoob/deployment-gcp-vm': 1.1.0
+      '@aganoob/deployment': 2.2.0
+      '@aganoob/deployment-gcp-cloud-run': 2.2.0(patch_hash=4142dd4cce36f2fefe71cba331d5843db6af1dabc2a62f115c67c2c335233c4e)
 
   '@aganoob/components@1.0.0(@aganoob/core@1.0.0(react@19.2.8))(react@19.2.8)':
     dependencies:
@@ -1188,11 +1196,11 @@ snapshots:
     dependencies:
       react: 19.2.8
 
-  '@aganoob/deployment-gcp-vm@1.1.0':
+  '@aganoob/deployment-gcp-cloud-run@2.2.0(patch_hash=4142dd4cce36f2fefe71cba331d5843db6af1dabc2a62f115c67c2c335233c4e)':
     dependencies:
-      '@aganoob/deployment': 1.1.0
+      '@aganoob/deployment': 2.2.0
 
-  '@aganoob/deployment@1.1.0': {}
+  '@aganoob/deployment@2.2.0': {}
 
   '@aganoob/experiments@1.0.0': {}
 
@@ -1415,16 +1423,16 @@ snapshots:
   '@next/swc-win32-x64-msvc@15.5.23':
     optional: true
 
-  '@posthog/browser-common@0.6.0':
+  '@posthog/browser-common@0.6.1':
     dependencies:
-      '@posthog/core': 1.48.11
-      '@posthog/types': 1.406.1
+      '@posthog/core': 1.49.1
+      '@posthog/types': 1.407.0
 
-  '@posthog/core@1.48.11':
+  '@posthog/core@1.49.1':
     dependencies:
-      '@posthog/types': 1.406.1
+      '@posthog/types': 1.407.0
 
-  '@posthog/types@1.406.1': {}
+  '@posthog/types@1.407.0': {}
 
   '@rollup/rollup-android-arm-eabi@4.62.5':
     optional: true
@@ -1808,11 +1816,11 @@ snapshots:
     dependencies:
       xtend: 4.0.2
 
-  posthog-js@1.419.4(@types/react@19.2.18)(react@19.2.8):
+  posthog-js@1.422.1(@types/react@19.2.18)(react@19.2.8):
     dependencies:
-      '@posthog/browser-common': 0.6.0
-      '@posthog/core': 1.48.11
-      '@posthog/types': 1.406.1
+      '@posthog/browser-common': 0.6.1
+      '@posthog/core': 1.49.1
+      '@posthog/types': 1.407.0
       core-js: 3.50.0
       dompurify: 3.4.14
       fflate: 0.4.9

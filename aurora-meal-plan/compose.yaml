@@ -8,40 +8,11 @@ services:
       - path: .env.local
         required: false
     expose: ["3000"]
-    depends_on:
-      postgres:
-        condition: service_healthy
     healthcheck:
       test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/api/health').then(r => process.exit(r.ok ? 0 : 1))"]
       interval: 10s
       timeout: 3s
       retries: 10
-  worker:
-    build:
-      context: .
-      secrets:
-        - npm_token
-    command: ["node", "server.js"]
-    environment:
-      SHIPFLOW_DELIVERY_WORKER: "true"
-    env_file:
-      - path: .env.local
-        required: false
-    depends_on:
-      postgres:
-        condition: service_healthy
-  postgres:
-    image: postgres:16-alpine
-    env_file:
-      - path: .env.local
-        required: false
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
-      interval: 10s
-      timeout: 3s
-      retries: 10
-    volumes:
-      - shipflow-postgres:/var/lib/postgresql/data
   caddy:
     image: caddy:2.8.4-alpine
     depends_on:
@@ -53,7 +24,6 @@ services:
       - caddy-data:/data
       - caddy-config:/config
 volumes:
-  shipflow-postgres:
   caddy-data:
   caddy-config:
 secrets:

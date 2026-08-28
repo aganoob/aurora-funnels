@@ -8,22 +8,19 @@
     "start": "next start",
     "validate": "tsc --noEmit && shipflow doctor",
     "test": "vitest run",
-    "deploy:preflight": "node scripts/deploy-preflight.mjs",
-    "deploy:check": "pnpm validate && pnpm test && pnpm build && pnpm shipflow deploy doctor --environment production && pnpm deploy:preflight",
-    "deploy:render": "pnpm shipflow deploy render --host production --out .shipflow/rendered/production",
     "funnel:add": "shipflow add",
     "shipflow:upgrade": "pnpm dlx @aganoob/cli@latest upgrade"
   },
   "dependencies": {
     "@aganoob/analytics": "^2.0.1",
-    "@aganoob/analytics-delivery": "^1.0.0",
+    "@aganoob/analytics-delivery": "^2.2.0",
     "@aganoob/analytics-meta": "^2.0.2",
     "@aganoob/attribution": "^1.0.0",
-    "@aganoob/cli": "^2.1.0",
+    "@aganoob/cli": "^2.2.0",
     "@aganoob/components": "^1.0.0",
     "@aganoob/core": "^1.0.0",
-    "@aganoob/deployment": "^1.1.0",
-    "@aganoob/deployment-gcp-vm": "^1.1.0",
+    "@aganoob/deployment": "^2.2.0",
+    "@aganoob/deployment-gcp-cloud-run": "^2.2.0",
     "@aganoob/experiments": "^1.0.0",
     "@aganoob/patterns": "^1.0.0",
     "@aganoob/payments": "^1.0.1",
@@ -39,5 +36,11 @@
     "@types/react-dom": "^19.0.8",
     "typescript": "^5.7.3",
     "vitest": "^3.0.5"
+  },
+  "pnpm": {
+    "patchedDependencies": {
+      "@aganoob/cli@2.2.0": "patches/@aganoob__cli@2.2.0.patch",
+      "@aganoob/deployment-gcp-cloud-run@2.2.0": "patches/@aganoob__deployment-gcp-cloud-run@2.2.0.patch"
+    }
   }
 }

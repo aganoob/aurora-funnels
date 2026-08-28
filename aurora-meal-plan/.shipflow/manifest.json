@@ -1,6 +1,6 @@
 {
   "sdkVersion": "latest",
-  "preset": "next-docker-nginx",
+  "preset": "next-docker-caddy",
   "migrations": [
     "upgrade:latest",
     "meta-v2",

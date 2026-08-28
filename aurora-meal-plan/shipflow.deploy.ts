@@ -1,8 +1,16 @@
 import { defineDeploymentConfig } from "@aganoob/deployment";
-import { gcpAnalyticsDelivery, gcpCloudRun } from "@aganoob/deployment-gcp-cloud-run";
+import { gcpCloudRun } from "@aganoob/deployment-gcp-cloud-run";
 
 export default defineDeploymentConfig({
   environments: {
+    staging: {
+      target: gcpCloudRun({
+        projectId: "aurora-funnels",
+        region: "europe-west2",
+        service: "aurora-meal-staging",
+      }),
+      analyticsDelivery: { kind: "browser-only" },
+    },
     production: {
       target: gcpCloudRun({
         projectId: "aurora-funnels",
@@ -10,7 +18,7 @@ export default defineDeploymentConfig({
         service: "aurora-meal-production",
       }),
       domains: { primary: "aurora-meal.maratz.dev", aliases: [] },
-      analyticsDelivery: gcpAnalyticsDelivery({ contextTtlDays: 7 }),
+      analyticsDelivery: { kind: "browser-only" },
     },
   },
 });

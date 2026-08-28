@@ -8,7 +8,18 @@ export async function POST(request: Request) {
   const event = await request.json() as TrackedEvent;
   if (!canonicalEvents.includes(event.event) || !event.context?.eventId || !event.context?.occurredAt) return NextResponse.json({ error: "Invalid canonical event" }, { status: 400 });
   const funnel = funnels[event.context.funnelId];
-  if (!funnel || funnel.productId !== event.context.productId) return NextResponse.json({ error: "Invalid funnel context" }, { status: 400 });
+  if (!funnel) return NextResponse.json({
+    error: "Invalid funnel context",
+    code: "unknown_funnel",
+    funnelId: event.context.funnelId,
+  }, { status: 400 });
+  if (funnel.productId !== event.context.productId) return NextResponse.json({
+    error: "Invalid funnel context",
+    code: "product_mismatch",
+    funnelId: funnel.id,
+    productId: event.context.productId,
+    expectedProductId: funnel.productId,
+  }, { status: 400 });
   if (["subscription_started", "subscription_renewed", "subscription_cancelled", "subscription_refunded"].includes(event.event)) return NextResponse.json({ error: "Server event required" }, { status: 403 });
   const providers = await serverAnalytics.deliver(event, request);
   return NextResponse.json({ accepted: true, providers }, { status: 202 });
