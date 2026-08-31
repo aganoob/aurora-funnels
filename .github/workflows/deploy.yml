@@ -1,0 +1,217 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  id-token: write
+  packages: read
+
+jobs:
+  validate:
+    name: Validate deployment source
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: aurora-meal-plan
+    env:
+      NPM_TOKEN: ${{ github.token }}
+    steps:
+      - name: Check out the pushed commit
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.0
+        with:
+          ref: ${{ github.sha }}
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.0
+        with:
+          version: 10.6.1
+
+      - name: Set up Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: aurora-meal-plan/pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Validate, test, and build
+        run: pnpm validate && pnpm test && pnpm build
+
+  deploy-staging:
+    name: Deploy staging
+    needs: validate
+    runs-on: ubuntu-latest
+    environment:
+      name: staging
+      url: https://aurora-meal-staging-161179816233.europe-west2.run.app
+    concurrency:
+      group: deploy-staging
+      cancel-in-progress: true
+    defaults:
+      run:
+        working-directory: aurora-meal-plan
+    env:
+      GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
+      GCP_REGION: ${{ vars.GCP_REGION }}
+      GCP_WORKLOAD_IDENTITY_PROVIDER: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+      GCP_DEPLOY_SERVICE_ACCOUNT: ${{ vars.GCP_DEPLOY_SERVICE_ACCOUNT }}
+      META_TEST_EVENT_CODE: ${{ vars.META_TEST_EVENT_CODE }}
+      NEXT_PUBLIC_APP_URL: ${{ vars.NEXT_PUBLIC_APP_URL }}
+      NEXT_PUBLIC_META_DATASET_ID: ${{ vars.NEXT_PUBLIC_META_DATASET_ID }}
+      NEXT_PUBLIC_META_MODE: ${{ vars.NEXT_PUBLIC_META_MODE }}
+      NEXT_PUBLIC_POSTHOG_HOST: ${{ vars.NEXT_PUBLIC_POSTHOG_HOST }}
+      NEXT_PUBLIC_POSTHOG_KEY: ${{ vars.NEXT_PUBLIC_POSTHOG_KEY }}
+      NPM_TOKEN: ${{ github.token }}
+      SHIPFLOW_ENVIRONMENT: staging
+      SHIPFLOW_PUBLIC_URL: ${{ vars.SHIPFLOW_PUBLIC_URL }}
+      STRIPE_PRICE_AURORA_MEAL_PLAN_ANNUAL: ${{ vars.STRIPE_PRICE_AURORA_MEAL_PLAN_ANNUAL }}
+    steps:
+      - name: Check out the pushed commit
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.0
+        with:
+          ref: ${{ github.sha }}
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.0
+        with:
+          version: 10.6.1
+
+      - name: Set up Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: aurora-meal-plan/pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3.0.0
+        with:
+          project_id: ${{ env.GCP_PROJECT_ID }}
+          workload_identity_provider: ${{ env.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ env.GCP_DEPLOY_SERVICE_ACCOUNT }}
+
+      - name: Set up Google Cloud SDK
+        uses: google-github-actions/setup-gcloud@aa5489c8933f4cc7a4f7d45035b3b1440c9c10db # v3.0.0
+
+      - name: Refresh the Cloud Build package token
+        run: >-
+          printf '%s' "$NPM_TOKEN" |
+          gcloud secrets versions add "shipflow-${SHIPFLOW_ENVIRONMENT}-npm-token"
+          --data-file=- --project "$GCP_PROJECT_ID"
+
+      - name: Check staging deployment prerequisites
+        run: pnpm shipflow deploy doctor --environment staging
+
+      - name: Release staging
+        run: pnpm shipflow deploy release --environment staging --yes --non-interactive
+
+      - name: Verify staging health
+        run: >-
+          curl --fail --retry 5 --retry-delay 5 --show-error
+          "https://aurora-meal-staging-161179816233.europe-west2.run.app/api/health"
+
+      - name: Recheck staging deployment
+        run: pnpm shipflow deploy doctor --environment staging
+
+  deploy-production:
+    name: Deploy production
+    needs: deploy-staging
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: https://aurora-meal.maratz.dev
+    concurrency:
+      group: deploy-production
+      cancel-in-progress: false
+    defaults:
+      run:
+        working-directory: aurora-meal-plan
+    env:
+      GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
+      GCP_REGION: ${{ vars.GCP_REGION }}
+      GCP_WORKLOAD_IDENTITY_PROVIDER: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+      GCP_DEPLOY_SERVICE_ACCOUNT: ${{ vars.GCP_DEPLOY_SERVICE_ACCOUNT }}
+      META_TEST_EVENT_CODE: ${{ vars.META_TEST_EVENT_CODE }}
+      NEXT_PUBLIC_APP_URL: ${{ vars.NEXT_PUBLIC_APP_URL }}
+      NEXT_PUBLIC_META_DATASET_ID: ${{ vars.NEXT_PUBLIC_META_DATASET_ID }}
+      NEXT_PUBLIC_META_MODE: ${{ vars.NEXT_PUBLIC_META_MODE }}
+      NEXT_PUBLIC_POSTHOG_HOST: ${{ vars.NEXT_PUBLIC_POSTHOG_HOST }}
+      NEXT_PUBLIC_POSTHOG_KEY: ${{ vars.NEXT_PUBLIC_POSTHOG_KEY }}
+      NPM_TOKEN: ${{ github.token }}
+      SHIPFLOW_ENVIRONMENT: production
+      SHIPFLOW_PUBLIC_URL: ${{ vars.SHIPFLOW_PUBLIC_URL }}
+      STRIPE_PRICE_AURORA_MEAL_PLAN_ANNUAL: ${{ vars.STRIPE_PRICE_AURORA_MEAL_PLAN_ANNUAL }}
+    steps:
+      - name: Verify this is the current main commit
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          current_sha="$(gh api "repos/${GITHUB_REPOSITORY}/commits/main" --jq .sha)"
+          test "$current_sha" = "$GITHUB_SHA"
+
+      - name: Check out the approved commit
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.0
+        with:
+          ref: ${{ github.sha }}
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.0
+        with:
+          version: 10.6.1
+
+      - name: Set up Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: aurora-meal-plan/pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3.0.0
+        with:
+          project_id: ${{ env.GCP_PROJECT_ID }}
+          workload_identity_provider: ${{ env.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ env.GCP_DEPLOY_SERVICE_ACCOUNT }}
+
+      - name: Set up Google Cloud SDK
+        uses: google-github-actions/setup-gcloud@aa5489c8933f4cc7a4f7d45035b3b1440c9c10db # v3.0.0
+
+      - name: Refresh the Cloud Build package token
+        run: >-
+          printf '%s' "$NPM_TOKEN" |
+          gcloud secrets versions add "shipflow-${SHIPFLOW_ENVIRONMENT}-npm-token"
+          --data-file=- --project "$GCP_PROJECT_ID"
+
+      - name: Check production deployment prerequisites
+        run: pnpm shipflow deploy doctor --environment production
+
+      - name: Release production
+        run: pnpm shipflow deploy release --environment production --yes --non-interactive
+
+      - name: Verify production Cloud Run health
+        run: |
+          service_url="$(pnpm shipflow deploy status --environment production --json | jq -r .url)"
+          test -n "$service_url"
+          curl --fail --retry 5 --retry-delay 5 --show-error "${service_url}/api/health"
+
+      - name: Verify production domain health when DNS is active
+        run: |
+          if getent ahostsv4 aurora-meal.maratz.dev >/dev/null; then
+            curl --fail --retry 5 --retry-delay 5 --show-error "https://aurora-meal.maratz.dev/api/health"
+          else
+            echo "Production domain DNS is awaiting Shipflow domain setup."
+          fi
+
+      - name: Recheck production deployment
+        run: pnpm shipflow deploy doctor --environment production

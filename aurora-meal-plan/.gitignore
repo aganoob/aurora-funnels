@@ -5,3 +5,5 @@ coverage
 *.tsbuildinfo
 .env.local
 .shipflow/deploy/*.env
+.shipflow/cloudbuild-*.yaml
+gha-creds-*.json

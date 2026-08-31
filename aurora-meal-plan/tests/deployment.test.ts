@@ -39,6 +39,23 @@ describe("staging deployment", () => {
   });
 });
 
+describe("production deployment", () => {
+  it("uses a separate Cloud Run service with the Aurora production domain", () => {
+    expect(deploymentConfig.environments.production).toMatchObject({
+      target: {
+        projectId: "aurora-funnels",
+        region: "europe-west2",
+        service: "aurora-meal-production",
+      },
+      domains: { primary: "aurora-meal.maratz.dev", aliases: [] },
+      analyticsDelivery: { kind: "browser-only" },
+    });
+
+    expect(deploymentConfig.environments.production.target.service)
+      .not.toBe(deploymentConfig.environments.staging.target.service);
+  });
+});
+
 describe("health endpoint", () => {
   afterEach(() => vi.unstubAllEnvs());
 
