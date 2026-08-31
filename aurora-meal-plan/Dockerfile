@@ -3,6 +3,7 @@ FROM node:22-alpine AS deps
 WORKDIR /app
 RUN corepack enable
 COPY package.json pnpm-lock.yaml .npmrc ./
+COPY patches ./patches
 RUN --mount=type=secret,id=npm_token \
     NPM_TOKEN="$(cat /run/secrets/npm_token)" pnpm install --frozen-lockfile
 COPY . .

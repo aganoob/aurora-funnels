@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 const { create, productById } = vi.hoisted(() => ({
   create: vi.fn(),
@@ -28,6 +28,11 @@ const requestFor = () => new Request("http://localhost:3000/api/checkout", {
 });
 
 describe("checkout route", () => {
+  afterEach(() => {
+    vi.clearAllMocks();
+    vi.unstubAllEnvs();
+  });
+
   it("reports an invalid Stripe price configuration without calling Stripe", async () => {
     vi.stubEnv("STRIPE_SECRET_KEY", "sk_test_example");
     productById.mockReturnValue({ offers: { annual: { stripePriceId: "prod_instead_of_price" } } });
@@ -52,6 +57,7 @@ describe("checkout route", () => {
 
   it("returns customers to the thank-you page after a successful checkout", async () => {
     vi.stubEnv("STRIPE_SECRET_KEY", "sk_test_example");
+    vi.stubEnv("NEXT_PUBLIC_APP_URL", "http://localhost:3000");
     productById.mockReturnValue({ offers: { annual: { stripePriceId: "price_annual" } } });
     create.mockResolvedValue({ id: "cs_test_123", url: "https://checkout.stripe.com/c/pay/cs_test_123" });
 

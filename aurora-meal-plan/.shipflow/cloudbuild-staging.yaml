@@ -1,0 +1,16 @@
+steps:
+- name: gcr.io/cloud-builders/docker
+  entrypoint: bash
+  secretEnv: [NPM_TOKEN]
+  args:
+  - -ceu
+  - |
+    DOCKER_BUILDKIT=1 docker build --secret id=npm_token,env=NPM_TOKEN --build-arg NEXT_PUBLIC_META_MODE='test' --build-arg NEXT_PUBLIC_POSTHOG_HOST='https://us.i.posthog.com' --build-arg NEXT_PUBLIC_META_DATASET_ID='1697500834672117' --build-arg NEXT_PUBLIC_APP_URL='https://aurora-meal-staging-161179816233.europe-west2.run.app' --build-arg NEXT_PUBLIC_POSTHOG_KEY='phc_vfK5mR4qc2PWRixf9txmBTrMmbdnjj9XSLdCsFNufyxK' -t 'europe-west2-docker.pkg.dev/aurora-funnels/shipflow/aurora-meal-staging:1787925718270-3e6ee123' .
+    docker push 'europe-west2-docker.pkg.dev/aurora-funnels/shipflow/aurora-meal-staging:1787925718270-3e6ee123'
+options:
+  logging: CLOUD_LOGGING_ONLY
+availableSecrets:
+  secretManager:
+  - versionName: projects/aurora-funnels/secrets/shipflow-staging-npm-token/versions/latest
+    env: NPM_TOKEN
+images: ['europe-west2-docker.pkg.dev/aurora-funnels/shipflow/aurora-meal-staging:1787925718270-3e6ee123']

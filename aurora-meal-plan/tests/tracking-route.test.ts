@@ -5,11 +5,7 @@ const { deliver } = vi.hoisted(() => ({
 }));
 
 vi.mock("../lib/analytics-server", () => ({ serverAnalytics: { deliver } }));
-vi.mock("../funnels/catalog", () => ({
-  funnels: {
-    "aurora-meal-plan": { id: "aurora-meal-plan", productId: "aurora-meal-plan" },
-  },
-}));
+vi.mock("../funnels/registry", () => ({ funnelProducts: { "aurora-meal-plan": "aurora-meal-plan" } }));
 
 import { POST } from "../app/api/track/route";
 
