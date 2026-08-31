@@ -17,7 +17,7 @@ jobs:
       run:
         working-directory: aurora-meal-plan
     env:
-      NPM_TOKEN: ${{ github.token }}
+      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
     steps:
       - name: Check out the pushed commit
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.0
@@ -66,7 +66,7 @@ jobs:
       NEXT_PUBLIC_META_MODE: ${{ vars.NEXT_PUBLIC_META_MODE }}
       NEXT_PUBLIC_POSTHOG_HOST: ${{ vars.NEXT_PUBLIC_POSTHOG_HOST }}
       NEXT_PUBLIC_POSTHOG_KEY: ${{ vars.NEXT_PUBLIC_POSTHOG_KEY }}
-      NPM_TOKEN: ${{ github.token }}
+      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
       SHIPFLOW_ENVIRONMENT: staging
       SHIPFLOW_PUBLIC_URL: ${{ vars.SHIPFLOW_PUBLIC_URL }}
       STRIPE_PRICE_AURORA_MEAL_PLAN_ANNUAL: ${{ vars.STRIPE_PRICE_AURORA_MEAL_PLAN_ANNUAL }}
@@ -145,7 +145,7 @@ jobs:
       NEXT_PUBLIC_META_MODE: ${{ vars.NEXT_PUBLIC_META_MODE }}
       NEXT_PUBLIC_POSTHOG_HOST: ${{ vars.NEXT_PUBLIC_POSTHOG_HOST }}
       NEXT_PUBLIC_POSTHOG_KEY: ${{ vars.NEXT_PUBLIC_POSTHOG_KEY }}
-      NPM_TOKEN: ${{ github.token }}
+      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
       SHIPFLOW_ENVIRONMENT: production
       SHIPFLOW_PUBLIC_URL: ${{ vars.SHIPFLOW_PUBLIC_URL }}
       STRIPE_PRICE_AURORA_MEAL_PLAN_ANNUAL: ${{ vars.STRIPE_PRICE_AURORA_MEAL_PLAN_ANNUAL }}

@@ -21,9 +21,7 @@ Populate these Secret Manager values for each environment with `pnpm shipflow de
 - `meta-capi-access-token`
 - `posthog-project-api-key`
 
-GitHub Actions refreshes each `npm-token` secret using its job-scoped `GITHUB_TOKEN`. Give this repository Actions access to all required `@aganoob` packages first.
-
-For each package, open **Package settings → Manage Actions access**, add `aganoob/aurora-funnels`, and grant **Read** access. The required packages are `analytics`, `analytics-delivery`, `analytics-meta`, `attribution`, `cli`, `components`, `core`, `deployment`, `deployment-gcp-cloud-run`, `experiments`, `patterns`, `payments`, and `registry`.
+Create a repository Actions secret named `NPM_TOKEN` with a GitHub personal access token that has the `read:packages` scope. GitHub Actions refreshes each environment's `npm-token` Secret Manager value from this repository secret before Cloud Build begins.
 
 Create separate Stripe test/live prices and webhook endpoints, Meta destinations, and PostHog projects. Set the following GitHub environment variables for both `staging` and `production`:
 
