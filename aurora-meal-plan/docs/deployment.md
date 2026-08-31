@@ -42,13 +42,14 @@ Set `META_TEST_EVENT_CODE` for staging. Set these repository variables once:
 
 ## Production domain
 
-After the first production release, run:
+After the first staging and production releases, run:
 
 ```bash
+pnpm shipflow deploy domain setup --environment staging --yes
 pnpm shipflow deploy domain setup --environment production --yes
 ```
 
-Create the printed DNS A record for `aurora-meal.maratz.dev`. Run the command again after DNS propagates so Shipflow can activate the Cloud Run load-balancer route and verify HTTPS health.
+Create the printed DNS A records for `start.aurorafirst.ai` and `preview-start.aurorafirst.ai`. Run the command again after DNS propagates so Shipflow can activate each Cloud Run load-balancer route and verify HTTPS health.
 
 ## Operations
 

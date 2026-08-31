@@ -48,7 +48,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: staging
-      url: https://aurora-meal-staging-161179816233.europe-west2.run.app
+      url: https://preview-start.aurorafirst.ai
     concurrency:
       group: deploy-staging
       cancel-in-progress: true
@@ -113,10 +113,13 @@ jobs:
       - name: Release staging
         run: pnpm shipflow deploy release --environment staging --yes --non-interactive
 
-      - name: Verify staging health
-        run: >-
-          curl --fail --retry 5 --retry-delay 5 --show-error
-          "https://aurora-meal-staging-161179816233.europe-west2.run.app/api/health"
+      - name: Verify staging domain health when DNS is active
+        run: |
+          if getent ahostsv4 preview-start.aurorafirst.ai >/dev/null; then
+            curl --fail --retry 5 --retry-delay 5 --show-error "https://preview-start.aurorafirst.ai/api/health"
+          else
+            echo "Preview domain DNS is awaiting Shipflow domain setup."
+          fi
 
       - name: Recheck staging deployment
         run: pnpm shipflow deploy doctor --environment staging
@@ -127,7 +130,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: production
-      url: https://aurora-meal.maratz.dev
+      url: https://start.aurorafirst.ai
     concurrency:
       group: deploy-production
       cancel-in-progress: false
@@ -207,8 +210,8 @@ jobs:
 
       - name: Verify production domain health when DNS is active
         run: |
-          if getent ahostsv4 aurora-meal.maratz.dev >/dev/null; then
-            curl --fail --retry 5 --retry-delay 5 --show-error "https://aurora-meal.maratz.dev/api/health"
+          if getent ahostsv4 start.aurorafirst.ai >/dev/null; then
+            curl --fail --retry 5 --retry-delay 5 --show-error "https://start.aurorafirst.ai/api/health"
           else
             echo "Production domain DNS is awaiting Shipflow domain setup."
           fi

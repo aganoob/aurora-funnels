@@ -9,6 +9,7 @@ export default defineDeploymentConfig({
         region: "europe-west2",
         service: "aurora-meal-staging",
       }),
+      domains: { primary: "preview-start.aurorafirst.ai", aliases: [] },
       analyticsDelivery: { kind: "browser-only" },
     },
     production: {
@@ -17,7 +18,7 @@ export default defineDeploymentConfig({
         region: "europe-west2",
         service: "aurora-meal-production",
       }),
-      domains: { primary: "aurora-meal.maratz.dev", aliases: [] },
+      domains: { primary: "start.aurorafirst.ai", aliases: [] },
       analyticsDelivery: { kind: "browser-only" },
     },
   },

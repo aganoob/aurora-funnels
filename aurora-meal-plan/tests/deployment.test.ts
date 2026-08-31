@@ -22,16 +22,16 @@ describe("production runtime configuration", () => {
 });
 
 describe("staging deployment", () => {
-  it("uses an isolated public Cloud Run service without a custom domain", () => {
+  it("uses an isolated public Cloud Run service with the preview domain", () => {
     expect(deploymentConfig.environments.staging).toMatchObject({
       target: {
         projectId: "aurora-funnels",
         region: "europe-west2",
         service: "aurora-meal-staging",
       },
+      domains: { primary: "preview-start.aurorafirst.ai", aliases: [] },
       analyticsDelivery: { kind: "browser-only" },
     });
-    expect("domains" in deploymentConfig.environments.staging).toBe(false);
 
     const names = gcpResourceNames("staging", deploymentConfig.environments.staging.target);
     expect(names.buildServiceAccount).toHaveLength(30);
@@ -47,7 +47,7 @@ describe("production deployment", () => {
         region: "europe-west2",
         service: "aurora-meal-production",
       },
-      domains: { primary: "aurora-meal.maratz.dev", aliases: [] },
+      domains: { primary: "start.aurorafirst.ai", aliases: [] },
       analyticsDelivery: { kind: "browser-only" },
     });
 
