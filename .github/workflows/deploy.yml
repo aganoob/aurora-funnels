@@ -64,9 +64,10 @@ jobs:
       - uses: google-github-actions/setup-gcloud@v2
 
       - name: Refresh the Cloud Build package token
-        env:
-          SHIPFLOW_SECRET_VALUE: ${{ secrets.NPM_TOKEN }}
-        run: pnpm shipflow deploy secrets set --environment staging --name npm-token
+        run: >-
+          printf '%s' "$NPM_TOKEN" |
+          gcloud secrets versions add shipflow-staging-npm-token
+          --data-file=- --project aurora-funnels
 
       - name: Release staging
         run: pnpm shipflow deploy release --environment staging --yes --non-interactive
@@ -128,9 +129,10 @@ jobs:
       - uses: google-github-actions/setup-gcloud@v2
 
       - name: Refresh the Cloud Build package token
-        env:
-          SHIPFLOW_SECRET_VALUE: ${{ secrets.NPM_TOKEN }}
-        run: pnpm shipflow deploy secrets set --environment production --name npm-token
+        run: >-
+          printf '%s' "$NPM_TOKEN" |
+          gcloud secrets versions add shipflow-production-npm-token
+          --data-file=- --project aurora-funnels
 
       - name: Release production
         run: pnpm shipflow deploy release --environment production --yes --non-interactive

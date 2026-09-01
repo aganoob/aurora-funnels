@@ -2,6 +2,37 @@
 
 `main` releases to staging automatically. You can also open **Actions → Deploy Aurora meal plan → Run workflow**, select any workflow branch, and optionally enter a branch, tag, or commit SHA in `source_ref` to deploy that exact revision to staging. Production runs only from an automatic `main` push: it follows a successful staging release and waits for the GitHub production-environment approval.
 
+## Release flow
+
+```text
+Pull request → CI (types, tests, build) → merge to main
+  → staging release → production-environment approval → production release
+```
+
+The deployment workflow validates the source, builds an image in Cloud Build, deploys it to the environment's Cloud Run service, and runs Shipflow's deployment doctor. Staging and production use independent Cloud Run services and Secret Manager values.
+
+| Environment | Cloud Run service | Custom domain |
+| --- | --- | --- |
+| Staging | `aurora-meal-staging` | `preview-begin.aurorafirst.ai` |
+| Production | `aurora-meal-production` | `begin.aurorafirst.ai` |
+
+Use the production-environment approval as the release gate. A successful staging release is required before the production job can run.
+
+## GitHub Actions access to Google Cloud
+
+GitHub authenticates to Google Cloud with Workload Identity Federation. No long-lived GCP key is stored in GitHub.
+
+The pool `github-actions` and provider `aurora-funnels` accept OIDC tokens only from this repository's `main` branch. The provider also requires the workflow's matching GitHub environment:
+
+| GitHub environment | GCP deployer service account | Scope |
+| --- | --- | --- |
+| `staging` | `github-staging-deployer@aurora-funnels.iam.gserviceaccount.com` | Cloud Build, the staging build/runtime identities, the staging npm-token secret, and `aurora-meal-staging` |
+| `production` | `github-production-deployer@aurora-funnels.iam.gserviceaccount.com` | Cloud Build, the production build/runtime identities, the production npm-token secret, and `aurora-meal-production` |
+
+Each deployer has Cloud Run admin access conditioned on its single service. This preserves the production approval gate and prevents staging jobs from deploying production.
+
+The workflow installs pnpm before `actions/setup-node` restores the pnpm cache. Keep that ordering whenever the workflow changes.
+
 ## One-time setup
 
 Authenticate an administrator with Google Cloud and run the bootstrap script from this directory:
@@ -61,6 +92,39 @@ gcloud run services describe aurora-meal-production --project aurora-funnels --r
 Create or update the Stripe webhook endpoint for each environment to `<Cloud Run URL>/api/stripe/webhook`, then store that endpoint's signing secret in the corresponding `stripe-webhook-secret` Secret Manager value. Keep the staging Stripe test-mode endpoint separate from the production live-mode endpoint.
 
 When the custom domains are available, replace both GitHub environment variables and the Stripe webhook endpoint URL with the matching domain, then release each environment again.
+
+## Routine operations
+
+### Release an exact revision to staging
+
+Use **Actions → Deploy Aurora meal plan → Run workflow**. Select the workflow branch and set `source_ref` to a branch, tag, or commit SHA when needed. The production job runs only for a `main` push after staging succeeds.
+
+### Verify a release
+
+```bash
+pnpm shipflow deploy doctor --environment staging
+pnpm shipflow deploy doctor --environment production
+pnpm shipflow deploy status --environment production --json
+```
+
+Check the service health endpoint at `<service URL>/api/health`. After a custom-domain certificate becomes ready, also check `https://preview-begin.aurorafirst.ai/api/health` and `https://begin.aurorafirst.ai/api/health`.
+
+### Roll back production
+
+```bash
+pnpm shipflow deploy rollback --environment production --yes
+```
+
+Shipflow moves all production traffic to the newest ready revision that is outside the active traffic set. Confirm the selected revision and health endpoint after rollback.
+
+## Troubleshooting
+
+| Symptom | Check | Resolution |
+| --- | --- | --- |
+| `Unable to locate executable file: pnpm` | Deployment workflow order | Run `pnpm/action-setup` before `actions/setup-node` when the Node action caches pnpm. |
+| `invalid_target` from `google-github-actions/auth` | `GCP_WORKLOAD_IDENTITY_PROVIDER` and the `github-actions` pool/provider | Ensure the provider exists, its repository/branch/environment conditions match the workflow, and the matching deployer account has `roles/iam.workloadIdentityUser`. |
+| Cloud Build cannot read its uploaded source archive | `aurora-funnels_cloudbuild` bucket IAM | Grant the environment build account `roles/storage.objectViewer` on that bucket. |
+| Custom domain remains pending | `gcloud beta run domain-mappings describe` | Create the returned DNS record and wait for Google-managed certificate issuance. |
 
 ## Custom domains
 
