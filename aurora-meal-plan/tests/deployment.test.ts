@@ -22,20 +22,37 @@ describe("production runtime configuration", () => {
 });
 
 describe("staging deployment", () => {
-  it("uses an isolated public Cloud Run service without a custom domain", () => {
+  it("uses an isolated public Cloud Run service with the preview domain", () => {
     expect(deploymentConfig.environments.staging).toMatchObject({
       target: {
         projectId: "aurora-funnels",
-        region: "europe-west2",
+        region: "europe-west1",
         service: "aurora-meal-staging",
       },
+      domains: { primary: "preview-begin.aurorafirst.ai", aliases: [] },
       analyticsDelivery: { kind: "browser-only" },
     });
-    expect("domains" in deploymentConfig.environments.staging).toBe(false);
 
     const names = gcpResourceNames("staging", deploymentConfig.environments.staging.target);
     expect(names.buildServiceAccount).toHaveLength(30);
     expect(names.funnelServiceAccount).toHaveLength(30);
+  });
+});
+
+describe("production deployment", () => {
+  it("uses a separate Cloud Run service with the Aurora production domain", () => {
+    expect(deploymentConfig.environments.production).toMatchObject({
+      target: {
+        projectId: "aurora-funnels",
+        region: "europe-west1",
+        service: "aurora-meal-production",
+      },
+      domains: { primary: "begin.aurorafirst.ai", aliases: [] },
+      analyticsDelivery: { kind: "browser-only" },
+    });
+
+    expect(deploymentConfig.environments.production.target.service)
+      .not.toBe(deploymentConfig.environments.staging.target.service);
   });
 });
 

@@ -1,0 +1,137 @@
+name: Deploy Aurora meal plan
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      source_ref:
+        description: Optional branch, tag, or commit SHA to deploy to staging. The selected workflow branch is used when blank.
+        required: false
+        type: string
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  staging:
+    name: Release staging
+    runs-on: ubuntu-latest
+    environment:
+      name: staging
+      url: https://aurora-meal-staging-kbysqzdoca-ew.a.run.app
+    concurrency:
+      group: deploy-staging
+      cancel-in-progress: false
+    defaults:
+      run:
+        working-directory: aurora-meal-plan
+    env:
+      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+      NEXT_PUBLIC_APP_URL: https://aurora-meal-staging-kbysqzdoca-ew.a.run.app
+      NEXT_PUBLIC_POSTHOG_KEY: ${{ vars.NEXT_PUBLIC_POSTHOG_KEY }}
+      NEXT_PUBLIC_POSTHOG_HOST: ${{ vars.NEXT_PUBLIC_POSTHOG_HOST }}
+      NEXT_PUBLIC_META_DATASET_ID: ${{ vars.NEXT_PUBLIC_META_DATASET_ID }}
+      NEXT_PUBLIC_META_MODE: ${{ vars.NEXT_PUBLIC_META_MODE }}
+      SHIPFLOW_PUBLIC_URL: https://aurora-meal-staging-kbysqzdoca-ew.a.run.app
+      STRIPE_PRICE_AURORA_MEAL_PLAN_ANNUAL: ${{ vars.STRIPE_PRICE_AURORA_MEAL_PLAN_ANNUAL }}
+      META_TEST_EVENT_CODE: ${{ vars.META_TEST_EVENT_CODE }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.source_ref || github.sha }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: aurora-meal-plan/pnpm-lock.yaml
+
+      - name: Enable pnpm
+        run: corepack enable
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ vars.GCP_DEPLOY_SERVICE_ACCOUNT }}
+
+      - uses: google-github-actions/setup-gcloud@v2
+
+      - name: Refresh the Cloud Build package token
+        env:
+          SHIPFLOW_SECRET_VALUE: ${{ secrets.NPM_TOKEN }}
+        run: pnpm shipflow deploy secrets set --environment staging --name npm-token
+
+      - name: Release staging
+        run: pnpm shipflow deploy release --environment staging --yes --non-interactive
+
+      - name: Verify staging
+        run: pnpm shipflow deploy doctor --environment staging
+
+  production:
+    needs: staging
+    if: >-
+      ${{
+        always() &&
+        needs.staging.result == 'success' &&
+        github.event_name == 'push' &&
+        github.ref == 'refs/heads/main'
+      }}
+    name: Release production
+    runs-on: ubuntu-latest
+    environment: production
+    concurrency:
+      group: deploy-production
+      cancel-in-progress: false
+    defaults:
+      run:
+        working-directory: aurora-meal-plan
+    env:
+      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+      NEXT_PUBLIC_APP_URL: ${{ vars.NEXT_PUBLIC_APP_URL }}
+      NEXT_PUBLIC_POSTHOG_KEY: ${{ vars.NEXT_PUBLIC_POSTHOG_KEY }}
+      NEXT_PUBLIC_POSTHOG_HOST: ${{ vars.NEXT_PUBLIC_POSTHOG_HOST }}
+      NEXT_PUBLIC_META_DATASET_ID: ${{ vars.NEXT_PUBLIC_META_DATASET_ID }}
+      NEXT_PUBLIC_META_MODE: ${{ vars.NEXT_PUBLIC_META_MODE }}
+      SHIPFLOW_PUBLIC_URL: ${{ vars.SHIPFLOW_PUBLIC_URL }}
+      STRIPE_PRICE_AURORA_MEAL_PLAN_ANNUAL: ${{ vars.STRIPE_PRICE_AURORA_MEAL_PLAN_ANNUAL }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: aurora-meal-plan/pnpm-lock.yaml
+
+      - name: Enable pnpm
+        run: corepack enable
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ vars.GCP_DEPLOY_SERVICE_ACCOUNT }}
+
+      - uses: google-github-actions/setup-gcloud@v2
+
+      - name: Refresh the Cloud Build package token
+        env:
+          SHIPFLOW_SECRET_VALUE: ${{ secrets.NPM_TOKEN }}
+        run: pnpm shipflow deploy secrets set --environment production --name npm-token
+
+      - name: Release production
+        run: pnpm shipflow deploy release --environment production --yes --non-interactive
+
+      - name: Verify production
+        run: pnpm shipflow deploy doctor --environment production

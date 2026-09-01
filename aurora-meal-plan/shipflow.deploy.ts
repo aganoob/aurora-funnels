@@ -6,18 +6,19 @@ export default defineDeploymentConfig({
     staging: {
       target: gcpCloudRun({
         projectId: "aurora-funnels",
-        region: "europe-west2",
+        region: "europe-west1",
         service: "aurora-meal-staging",
       }),
+      domains: { primary: "preview-begin.aurorafirst.ai", aliases: [] },
       analyticsDelivery: { kind: "browser-only" },
     },
     production: {
       target: gcpCloudRun({
         projectId: "aurora-funnels",
-        region: "europe-west2",
+        region: "europe-west1",
         service: "aurora-meal-production",
       }),
-      domains: { primary: "aurora-meal.maratz.dev", aliases: [] },
+      domains: { primary: "begin.aurorafirst.ai", aliases: [] },
       analyticsDelivery: { kind: "browser-only" },
     },
   },
