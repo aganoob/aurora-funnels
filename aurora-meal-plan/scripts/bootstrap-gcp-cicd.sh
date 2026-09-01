@@ -2,7 +2,7 @@
 set -euo pipefail
 
 project_id="${GCP_PROJECT_ID:-aurora-funnels}"
-region="${GCP_REGION:-europe-west2}"
+region="${GCP_REGION:-europe-west1}"
 pool_id="${GCP_WORKLOAD_IDENTITY_POOL_ID:-github-actions}"
 provider_id="${GCP_WORKLOAD_IDENTITY_PROVIDER_ID:-aurora-funnels}"
 repository_id="1344281725"

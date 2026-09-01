@@ -1,0 +1,25 @@
+diff --git a/bin/shipflow.mjs b/bin/shipflow.mjs
+--- a/bin/shipflow.mjs
++++ b/bin/shipflow.mjs
+@@ -152,7 +152,7 @@ async function deploymentPlan(integration, environmentName) {
+   if (!/^[a-z0-9-]+$/.test(selected.target.provider)) throw new Error(`Invalid deployment provider ${selected.target.provider}.`);
+   const packageName = `@aganoob/deployment-${selected.target.provider}`;
+   let provider;
+-  try { provider = await import(pathToFileURL(integration.projectRequire.resolve(packageName)).href); } catch { throw new Error(`Install ${packageName} before using deploy commands.`); }
++  try { provider = await import(packageName); } catch { throw new Error(`Install ${packageName} before using deploy commands.`); }
+   const adapter = provider.deploymentAdapter;
+   if (!adapter?.plan) throw new Error(`${packageName} does not export deploymentAdapter.`);
+   return { plan: adapter.plan(selectedName, selected), environmentName: selectedName, environment: selected, provider };
+@@ -317,8 +317,10 @@ async function deploymentRelease(context, options) {
+-  const productEnvironment = Object.fromEntries(Object.entries(process.env).filter(([name, value]) => Boolean(value) && (name.startsWith("STRIPE_PRICE_") || name === "SHIPFLOW_PUBLIC_URL" || name === "SHIPFLOW_PRODUCT_WEBHOOK_URL")));
++  const productEnvironment = Object.fromEntries(Object.entries(process.env).filter(([name, value]) => Boolean(value) && (name.startsWith("STRIPE_PRICE_") || name === "NEXT_PUBLIC_APP_URL" || name === "SHIPFLOW_PUBLIC_URL" || name === "SHIPFLOW_PRODUCT_WEBHOOK_URL")));
+   const secretMappings = [
+     `STRIPE_SECRET_KEY=${deploymentSecretName(context.environmentName, "stripe-secret-key")}:latest`,
+     `STRIPE_WEBHOOK_SECRET=${deploymentSecretName(context.environmentName, "stripe-webhook-secret")}:latest`,
++    `META_CAPI_ACCESS_TOKEN=${deploymentSecretName(context.environmentName, "meta-capi-access-token")}:latest`,
++    `POSTHOG_PROJECT_API_KEY=${deploymentSecretName(context.environmentName, "posthog-project-api-key")}:latest`,
+   ];
+   if (context.environment.analyticsDelivery.kind === "external-service") secretMappings.push(`SHIPFLOW_ANALYTICS_DELIVERY_HMAC_SECRET=${context.environment.analyticsDelivery.hmacSecretName}:latest`);
+-  runGcloud(["run", "deploy", target.service, "--image", image, ...gcpProjectArguments(context), "--port", "3000", "--service-account", `${names.funnelServiceAccount}@${target.projectId}.iam.gserviceaccount.com`, "--update-env-vars", [...env, ...Object.entries(productEnvironment).map(([name, value]) => `${name}=${value}`)].join(","), "--set-secrets", secretMappings.join(","), "--max", String(target.maxInstances ?? 10), "--min", String(target.minInstances ?? 0), "--concurrency", String(target.concurrency ?? 80), "--timeout", String(target.timeoutSeconds ?? 60), "--allow-unauthenticated"]);
++  runGcloud(["run", "deploy", target.service, "--image", image, ...gcpProjectArguments(context), "--port", "3000", "--service-account", `${names.funnelServiceAccount}@${target.projectId}.iam.gserviceaccount.com`, "--update-env-vars", [...env, ...Object.entries(productEnvironment).map(([name, value]) => `${name}=${value}`), ...(process.env.META_TEST_EVENT_CODE ? [`META_TEST_EVENT_CODE=${process.env.META_TEST_EVENT_CODE}`] : [])].join(","), "--set-secrets", secretMappings.join(","), "--max", String(target.maxInstances ?? 10), "--min", String(target.minInstances ?? 0), "--concurrency", String(target.concurrency ?? 80), "--timeout", String(target.timeoutSeconds ?? 60), "--allow-unauthenticated"]);
+   const service = runGcloud(["run", "services", "describe", target.service, ...gcpProjectArguments(context)], { json: true });

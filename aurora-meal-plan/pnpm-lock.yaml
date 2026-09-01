@@ -5,9 +5,9 @@ settings:
   excludeLinksFromLockfile: false
 
 patchedDependencies:
-  '@aganoob/cli@2.2.0':
-    hash: 6ce91133ca678d7b42adde6889a79d390b9229ab1aa7a73e8255ee58c5e07f60
-    path: patches/@aganoob__cli@2.2.0.patch
+  '@aganoob/cli@2.2.2':
+    hash: 76adac9d71da91e746bdd53fbcb545a26bdf577487d3e8a6db4c8b81edbc7196
+    path: patches/@aganoob__cli@2.2.2.patch
   '@aganoob/deployment-gcp-cloud-run@2.2.0':
     hash: 4142dd4cce36f2fefe71cba331d5843db6af1dabc2a62f115c67c2c335233c4e
     path: patches/@aganoob__deployment-gcp-cloud-run@2.2.0.patch
@@ -29,8 +29,8 @@ importers:
         specifier: ^1.0.0
         version: 1.0.0
       '@aganoob/cli':
-        specifier: ^2.2.0
-        version: 2.2.0(patch_hash=6ce91133ca678d7b42adde6889a79d390b9229ab1aa7a73e8255ee58c5e07f60)
+        specifier: ^2.2.2
+        version: 2.2.2(patch_hash=76adac9d71da91e746bdd53fbcb545a26bdf577487d3e8a6db4c8b81edbc7196)
       '@aganoob/components':
         specifier: ^1.0.0
         version: 1.0.0(@aganoob/core@1.0.0(react@19.2.8))(react@19.2.8)
@@ -99,8 +99,8 @@ packages:
   '@aganoob/attribution@1.0.0':
     resolution: {integrity: sha512-wugSCrm2z/tA+JydsYsozHpkAhzz0CQG8AXhLo6U3VZxMHq26mWQrHmpHZNowmaqKXKlUzKpb60ej5+UGytzRg==, tarball: https://npm.pkg.github.com/download/@aganoob/attribution/1.0.0/933414fee564c66683cf59060d9d16254142049f}
 
-  '@aganoob/cli@2.2.0':
-    resolution: {integrity: sha512-N6s7jMvIJ/DDU1bHRLxgCQZEFio9dhgrOSydaRXocr076TP7E9ZrjWWz/+9zdr3bRhw3RrbFZIm8739b9jzO4Q==, tarball: https://npm.pkg.github.com/download/@aganoob/cli/2.2.0/3eafc1dfef80c16b3bc4f5f583aef7bc3c36cd22}
+  '@aganoob/cli@2.2.2':
+    resolution: {integrity: sha512-FFjyMgBu9YwVyUSm3HReNQVyW67dP69KdnPm43Kj3uybS+gNfg9sFvXzSvU3aYM3N1FHIeuhhgx7+sbXjX9kRQ==, tarball: https://npm.pkg.github.com/download/@aganoob/cli/2.2.2/cd8eefe1ef09342e263f12aa9c02e648b2189055}
     engines: {node: '>=22'}
     hasBin: true
 
@@ -1182,7 +1182,7 @@ snapshots:
 
   '@aganoob/attribution@1.0.0': {}
 
-  '@aganoob/cli@2.2.0(patch_hash=6ce91133ca678d7b42adde6889a79d390b9229ab1aa7a73e8255ee58c5e07f60)':
+  '@aganoob/cli@2.2.2(patch_hash=76adac9d71da91e746bdd53fbcb545a26bdf577487d3e8a6db4c8b81edbc7196)':
     dependencies:
       '@aganoob/deployment': 2.2.0
       '@aganoob/deployment-gcp-cloud-run': 2.2.0(patch_hash=4142dd4cce36f2fefe71cba331d5843db6af1dabc2a62f115c67c2c335233c4e)

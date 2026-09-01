@@ -26,10 +26,10 @@ describe("staging deployment", () => {
     expect(deploymentConfig.environments.staging).toMatchObject({
       target: {
         projectId: "aurora-funnels",
-        region: "europe-west2",
+        region: "europe-west1",
         service: "aurora-meal-staging",
       },
-      domains: { primary: "preview-start.aurorafirst.ai", aliases: [] },
+      domains: { primary: "preview-begin.aurorafirst.ai", aliases: [] },
       analyticsDelivery: { kind: "browser-only" },
     });
 
@@ -44,10 +44,10 @@ describe("production deployment", () => {
     expect(deploymentConfig.environments.production).toMatchObject({
       target: {
         projectId: "aurora-funnels",
-        region: "europe-west2",
+        region: "europe-west1",
         service: "aurora-meal-production",
       },
-      domains: { primary: "start.aurorafirst.ai", aliases: [] },
+      domains: { primary: "begin.aurorafirst.ai", aliases: [] },
       analyticsDelivery: { kind: "browser-only" },
     });
 

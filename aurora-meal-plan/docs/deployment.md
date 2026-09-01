@@ -1,6 +1,6 @@
 # Deployments
 
-`main` releases to staging automatically. A GitHub production-environment approval then releases the same commit to production.
+`main` releases to staging automatically. You can also open **Actions → Deploy Aurora meal plan → Run workflow**, select any workflow branch, and optionally enter a branch, tag, or commit SHA in `source_ref` to deploy that exact revision to staging. Production runs only from an automatic `main` push: it follows a successful staging release and waits for the GitHub production-environment approval.
 
 ## One-time setup
 
@@ -34,22 +34,55 @@ Create separate Stripe test/live prices and webhook endpoints, Meta destinations
 - `SHIPFLOW_PUBLIC_URL`
 - `STRIPE_PRICE_AURORA_MEAL_PLAN_ANNUAL`
 
+> **Temporary production bootstrap:** the initial production release may use the current staging credentials. Before enabling live payments or production analytics, replace every `shipflow-production-*` secret and production environment variable with production-specific Stripe, Meta, and PostHog credentials, then release production again.
+
 Set `META_TEST_EVENT_CODE` for staging. Set these repository variables once:
 
 - `GCP_PROJECT_ID=aurora-funnels`
-- `GCP_REGION=europe-west2`
+- `GCP_REGION=europe-west1`
 - `GCP_WORKLOAD_IDENTITY_PROVIDER`, printed by the bootstrap script
 
-## Production domain
+## Cloud Run URLs while domains are pending
 
-After the first staging and production releases, run:
+The first release of each environment is available on its default Cloud Run URL; custom-domain setup can wait. For this project, use these temporary URLs in the matching GitHub environment variables:
+
+| Environment | `NEXT_PUBLIC_APP_URL` and `SHIPFLOW_PUBLIC_URL` |
+| --- | --- |
+| `staging` | `https://aurora-meal-staging-kbysqzdoca-ew.a.run.app` |
+| `production` | Read the value reported by `gcloud run services describe` after its first release. |
+
+Set `NEXT_PUBLIC_APP_URL` before the release because it is embedded in the browser build and used as the Stripe Checkout success and cancellation origin. Set `SHIPFLOW_PUBLIC_URL` to the same value for the runtime configuration. Cloud Run generates the hostname, so use the existing staging URL above and retrieve the production URL after its initial release:
 
 ```bash
-pnpm shipflow deploy domain setup --environment staging --yes
-pnpm shipflow deploy domain setup --environment production --yes
+gcloud run services describe aurora-meal-staging --project aurora-funnels --region europe-west1 --format='value(status.url)'
+gcloud run services describe aurora-meal-production --project aurora-funnels --region europe-west1 --format='value(status.url)'
 ```
 
-Create the printed DNS A records for `start.aurorafirst.ai` and `preview-start.aurorafirst.ai`. Run the command again after DNS propagates so Shipflow can activate each Cloud Run load-balancer route and verify HTTPS health.
+Create or update the Stripe webhook endpoint for each environment to `<Cloud Run URL>/api/stripe/webhook`, then store that endpoint's signing secret in the corresponding `stripe-webhook-secret` Secret Manager value. Keep the staging Stripe test-mode endpoint separate from the production live-mode endpoint.
+
+When the custom domains are available, replace both GitHub environment variables and the Stripe webhook endpoint URL with the matching domain, then release each environment again.
+
+## Custom domains
+
+Map each Cloud Run service directly to its hostname:
+
+```bash
+gcloud beta run domain-mappings create --service aurora-meal-staging --domain preview-begin.aurorafirst.ai --region europe-west1 --project aurora-funnels
+gcloud beta run domain-mappings create --service aurora-meal-production --domain begin.aurorafirst.ai --region europe-west1 --project aurora-funnels
+```
+
+Create these CNAME records at the domain's DNS provider:
+
+| Host | Target |
+| --- | --- |
+| `preview-begin` | `ghs.googlehosted.com.` |
+| `begin` | `ghs.googlehosted.com.` |
+
+Cloud Run provisions and renews the TLS certificates after DNS propagates. Inspect a mapping and its certificate state with `gcloud beta run domain-mappings describe --domain <domain> --region europe-west1 --project aurora-funnels`.
+
+## Regional cutover follow-up
+
+- [ ] After the `europe-west1` staging deployment, checkout flow, and domain routing are verified, decommission the legacy `europe-west2` Cloud Run service and its regional Artifact Registry images.
 
 ## Operations
 
