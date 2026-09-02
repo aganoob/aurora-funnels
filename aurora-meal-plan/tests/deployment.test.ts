@@ -1,3 +1,5 @@
+import { readFile } from "node:fs/promises";
+import { resolve } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { gcpResourceNames } from "@aganoob/deployment-gcp-cloud-run";
 import { GET } from "../app/api/health/route";
@@ -53,6 +55,17 @@ describe("production deployment", () => {
 
     expect(deploymentConfig.environments.production.target.service)
       .not.toBe(deploymentConfig.environments.staging.target.service);
+  });
+});
+
+describe("CI/CD bootstrap", () => {
+  it("grants source-staging bucket access to deployment identities", async () => {
+    const bootstrap = await readFile(resolve(process.cwd(), "scripts/bootstrap-gcp-cicd.sh"), "utf8");
+
+    expect(bootstrap).toContain("gcloud storage buckets add-iam-policy-binding");
+    expect(bootstrap).toContain('roles/storage.bucketViewer "${project_id}_cloudbuild"');
+    expect(bootstrap).toContain('roles/storage.objectUser "${project_id}_cloudbuild"');
+    expect(bootstrap).toContain('roles/storage.objectViewer "${project_id}_cloudbuild"');
   });
 });
 

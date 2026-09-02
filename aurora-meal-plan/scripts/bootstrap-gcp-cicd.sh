@@ -80,6 +80,13 @@ grant_service_role() {
   gcloud projects add-iam-policy-binding "$project_id" --member "$member" --role "$role" --condition "$condition" --quiet >/dev/null
 }
 
+grant_bucket_role() {
+  local member="$1"
+  local role="$2"
+  local bucket="$3"
+  gcloud storage buckets add-iam-policy-binding "gs://${bucket}" --member "$member" --role "$role" --quiet >/dev/null
+}
+
 for environment in staging production; do
   if [ "$environment" = staging ]; then
     service="aurora-meal-staging"
@@ -120,6 +127,9 @@ for environment in staging production; do
   grant_project_role "serviceAccount:${deploy_email}" roles/cloudbuild.builds.editor
   grant_project_role "serviceAccount:${deploy_email}" roles/serviceusage.serviceUsageConsumer
   grant_service_role "serviceAccount:${deploy_email}" roles/run.admin "$service"
+  grant_bucket_role "serviceAccount:${deploy_email}" roles/storage.bucketViewer "${project_id}_cloudbuild"
+  grant_bucket_role "serviceAccount:${deploy_email}" roles/storage.objectUser "${project_id}_cloudbuild"
+  grant_bucket_role "serviceAccount:${build_email}" roles/storage.objectViewer "${project_id}_cloudbuild"
 
   gcloud secrets add-iam-policy-binding "shipflow-${environment}-npm-token" \
     --project "$project_id" \

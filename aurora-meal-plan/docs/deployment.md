@@ -123,7 +123,7 @@ Shipflow moves all production traffic to the newest ready revision that is outsi
 | --- | --- | --- |
 | `Unable to locate executable file: pnpm` | Deployment workflow order | Run `pnpm/action-setup` before `actions/setup-node` when the Node action caches pnpm. |
 | `invalid_target` from `google-github-actions/auth` | `GCP_WORKLOAD_IDENTITY_PROVIDER` and the `github-actions` pool/provider | Ensure the provider exists, its repository/branch/environment conditions match the workflow, and the matching deployer account has `roles/iam.workloadIdentityUser`. |
-| Cloud Build cannot read its uploaded source archive | `aurora-funnels_cloudbuild` bucket IAM | Grant the environment build account `roles/storage.objectViewer` on that bucket. |
+| `gcloud builds submit` cannot access its source-staging bucket | `aurora-funnels_cloudbuild` bucket IAM | Re-run `./scripts/bootstrap-gcp-cicd.sh`. It grants each deployer `roles/storage.bucketViewer` and `roles/storage.objectUser`, plus `roles/storage.objectViewer` to its build account, on that bucket. |
 | Custom domain remains pending | `gcloud beta run domain-mappings describe` | Create the returned DNS record and wait for Google-managed certificate issuance. |
 
 ## Custom domains
