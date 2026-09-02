@@ -66,6 +66,7 @@ describe("CI/CD bootstrap", () => {
     expect(bootstrap).toContain('roles/storage.bucketViewer "${project_id}_cloudbuild"');
     expect(bootstrap).toContain('roles/storage.objectUser "${project_id}_cloudbuild"');
     expect(bootstrap).toContain('roles/storage.objectViewer "${project_id}_cloudbuild"');
+    expect(bootstrap).toContain('entity=user-${account},role=WRITER');
   });
 });
 

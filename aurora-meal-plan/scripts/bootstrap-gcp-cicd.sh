@@ -87,6 +87,16 @@ grant_bucket_role() {
   gcloud storage buckets add-iam-policy-binding "gs://${bucket}" --member "$member" --role "$role" --quiet >/dev/null
 }
 
+grant_bucket_legacy_writer() {
+  local account="$1"
+  local bucket="$2"
+  local uniform_access
+  uniform_access="$(gcloud storage buckets describe "gs://${bucket}" --format='value(uniform_bucket_level_access)')"
+  if [ "$uniform_access" = "False" ]; then
+    gcloud storage buckets update "gs://${bucket}" --add-acl-grant="entity=user-${account},role=WRITER" --quiet >/dev/null
+  fi
+}
+
 for environment in staging production; do
   if [ "$environment" = staging ]; then
     service="aurora-meal-staging"
@@ -130,6 +140,7 @@ for environment in staging production; do
   grant_bucket_role "serviceAccount:${deploy_email}" roles/storage.bucketViewer "${project_id}_cloudbuild"
   grant_bucket_role "serviceAccount:${deploy_email}" roles/storage.objectUser "${project_id}_cloudbuild"
   grant_bucket_role "serviceAccount:${build_email}" roles/storage.objectViewer "${project_id}_cloudbuild"
+  grant_bucket_legacy_writer "$deploy_email" "${project_id}_cloudbuild"
 
   gcloud secrets add-iam-policy-binding "shipflow-${environment}-npm-token" \
     --project "$project_id" \
