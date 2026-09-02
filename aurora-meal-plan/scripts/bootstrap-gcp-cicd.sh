@@ -97,6 +97,13 @@ grant_bucket_legacy_writer() {
   fi
 }
 
+ensure_cloudbuild_source_bucket() {
+  local bucket="$1"
+  if ! gcloud storage buckets describe "gs://${bucket}" >/dev/null 2>&1; then
+    gcloud storage buckets create "gs://${bucket}" --location US --quiet >/dev/null
+  fi
+}
+
 for environment in staging production; do
   if [ "$environment" = staging ]; then
     service="aurora-meal-staging"
@@ -105,6 +112,8 @@ for environment in staging production; do
   fi
 
   pnpm shipflow deploy setup --environment "$environment" --yes --non-interactive
+
+  ensure_cloudbuild_source_bucket "${project_id}_cloudbuild"
 
   IFS=$'\t' read -r build_account runtime_account <<<"$(environment_names "$environment" "$service")"
   deploy_account="github-${environment}-deployer"

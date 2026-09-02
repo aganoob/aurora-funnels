@@ -33,6 +33,32 @@ Each deployer has Cloud Run admin access conditioned on its single service. This
 
 The workflow installs pnpm before `actions/setup-node` restores the pnpm cache. Keep that ordering whenever the workflow changes.
 
+### GCP access: zero-to-hero checklist
+
+`scripts/bootstrap-gcp-cicd.sh` is the source of truth for the deployment access model. Run it again after changing this section; it is idempotent and reconciles the GitHub deployment identities, secrets, and Cloud Build source bucket.
+
+| Principal or resource | Required access | Scope and purpose |
+| --- | --- | --- |
+| Bootstrap operator | Project Owner, or an equivalent administrator role set | Creates APIs, Workload Identity resources, service accounts, secrets, Artifact Registry, Cloud Run resources, and bucket policies. |
+| Enabled APIs | Cloud Run, Cloud Build, Artifact Registry, Secret Manager, IAM Credentials, Logging, Compute | Required by `shipflow deploy setup`; Compute supports the configured custom domains. |
+| GitHub OIDC provider | Attribute mapping for repository ID, owner ID, branch, and GitHub environment | The provider accepts only this repository’s `main` branch with the `staging` or `production` environment. |
+| GitHub staging/production OIDC principal | `roles/iam.workloadIdentityUser` on its matching deployer service account | Allows the GitHub environment to impersonate only its matching deployer. |
+| `github-<environment>-deployer` | `roles/cloudbuild.builds.editor`, `roles/serviceusage.serviceUsageConsumer` | Creates builds and consumes enabled Google APIs. |
+| `github-<environment>-deployer` | `roles/run.admin`, conditioned on its one Cloud Run service | Deploys staging only to `aurora-meal-staging` and production only to `aurora-meal-production`. |
+| `github-<environment>-deployer` | `roles/iam.serviceAccountUser` on its build and runtime accounts | Allows a release to select the dedicated Cloud Build and Cloud Run runtime identities. |
+| Build service account | `roles/artifactregistry.writer`, `roles/logging.logWriter`, `roles/secretmanager.secretAccessor` | Pushes the container, writes build logs, and reads its environment’s npm token. |
+| Runtime service account | `roles/secretmanager.secretAccessor` | Reads its environment’s Stripe, Meta, and PostHog runtime secrets. |
+| Deployer on `shipflow-<environment>-npm-token` | `roles/secretmanager.secretVersionAdder` | Refreshes the GitHub Packages token before each build. |
+| Build account on `shipflow-<environment>-npm-token` | `roles/secretmanager.secretAccessor` | Exposes the token to Cloud Build’s npm install only. |
+| `aurora-funnels_cloudbuild` source bucket | Deployer: `roles/storage.bucketViewer` and `roles/storage.objectUser`; build account: `roles/storage.objectViewer` | Uploads and fetches the archived build source. The bootstrap creates this `US` bucket if it is absent. |
+| Legacy source-bucket ACL, when uniform bucket-level access is disabled | Deployer: bucket ACL `WRITER` | Supports Cloud Build source uploads for the legacy default source bucket. The bootstrap checks the bucket mode and applies this only when ACLs are enabled. |
+
+The Cloud Build service agent remains project-managed through `roles/cloudbuild.serviceAgent`. A same-project custom build identity does not need an additional service-account token-creator binding. Cross-project custom build identities do require `roles/iam.serviceAccountTokenCreator` for the Cloud Build service agent in the identity’s project.
+
+### Required GitHub configuration
+
+Set the repository variables `GCP_PROJECT_ID`, `GCP_REGION`, and `GCP_WORKLOAD_IDENTITY_PROVIDER`. In each GitHub environment, set `GCP_DEPLOY_SERVICE_ACCOUNT` to its matching `github-<environment>-deployer@aurora-funnels.iam.gserviceaccount.com`, plus the public runtime variables listed below. Keep `NPM_TOKEN` as a repository Actions secret with `read:packages`.
+
 ## One-time setup
 
 Authenticate an administrator with Google Cloud and run the bootstrap script from this directory:
@@ -123,7 +149,7 @@ Shipflow moves all production traffic to the newest ready revision that is outsi
 | --- | --- | --- |
 | `Unable to locate executable file: pnpm` | Deployment workflow order | Run `pnpm/action-setup` before `actions/setup-node` when the Node action caches pnpm. |
 | `invalid_target` from `google-github-actions/auth` | `GCP_WORKLOAD_IDENTITY_PROVIDER` and the `github-actions` pool/provider | Ensure the provider exists, its repository/branch/environment conditions match the workflow, and the matching deployer account has `roles/iam.workloadIdentityUser`. |
-| `gcloud builds submit` cannot access its source-staging bucket | `aurora-funnels_cloudbuild` bucket IAM and ACL | Re-run `./scripts/bootstrap-gcp-cicd.sh`. It grants each deployer `roles/storage.bucketViewer` and `roles/storage.objectUser`, plus `roles/storage.objectViewer` to its build account. Buckets that still use legacy ACLs also grant each deployer `WRITER`. |
+| `gcloud builds submit` cannot access its source-staging bucket | `aurora-funnels_cloudbuild` bucket IAM and ACL | Re-run `./scripts/bootstrap-gcp-cicd.sh`. It creates the bucket when absent, grants each deployer `roles/storage.bucketViewer` and `roles/storage.objectUser`, plus `roles/storage.objectViewer` to its build account. Buckets that still use legacy ACLs also grant each deployer `WRITER`. |
 | Custom domain remains pending | `gcloud beta run domain-mappings describe` | Create the returned DNS record and wait for Google-managed certificate issuance. |
 
 ## Custom domains
