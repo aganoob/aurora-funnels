@@ -134,7 +134,7 @@ const organised = question({ field: "organised", progress: 58, multi: true, titl
 const healthy = question({ field: "healthy", progress: 68, multi: true, title: <>What does eating <Emphasis>healthy</Emphasis> mean to you?</>, detail: "Pick anything that fits. We’ll tune your recipe recommendations around it", choices: choices(["💪  More protein", "🥬  More veg", "⚖️  More balanced plate", "🚫  Fewer processed foods"]) });
 const meals = question({ field: "meals", progress: 76, multi: true, title: <>What type of meals do you want to <Emphasis>cook</Emphasis>?</>, detail: "Pick as many as you like – we've got them all.", choices: choices(["⏱️  Speedy weeknight dinners", "🍲  Cook-ahead dinners", "🥗  Packed lunches", "🥣  Preppable breakfasts"]) });
 
-export const auroraMealPlan = defineFunnel({ id: "aurora-meal-plan", productId: funnelProducts["aurora-meal-plan"], domains: ["start.aurorafirst.ai", "preview-start.aurorafirst.ai"], defaultOffer: "annual", screens: [
+export const auroraMealPlan = defineFunnel({ id: "aurora-meal-plan", productId: funnelProducts["aurora-meal-plan"], domains: ["begin.aurorafirst.ai", "preview-begin.aurorafirst.ai"], defaultOffer: "annual", checkoutOffers: ["annual"], checkoutRoutes: { annual: { paid: "success", trialing: "success" } }, screens: [
   defineScreen({ id: "splash", type: "landing", component: Splash }),
   defineScreen({ id: "household", type: "quiz_question", component: household, next: (session) => session.answers.household === "Family with kids" ? "kids" : "social-proof" }),
   defineScreen({ id: "social-proof", type: "social_proof", component: SocialProof, next: "personal" }), defineScreen({ id: "kids", type: "quiz_question", component: kids, next: "personal" }),
