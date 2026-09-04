@@ -1,6 +1,7 @@
 {
   "name": "aurora-meal-plan",
   "private": true,
+  "type": "module",
   "packageManager": "pnpm@10.6.1",
   "scripts": {
     "dev": "next dev",
@@ -13,18 +14,21 @@
   },
   "dependencies": {
     "@aganoob/analytics": "^2.0.1",
-    "@aganoob/analytics-delivery": "^2.2.0",
+    "@aganoob/analytics-delivery": "^2.3.0",
+    "@aganoob/analytics-delivery-gcp": "^2.3.0",
     "@aganoob/analytics-meta": "^2.0.2",
     "@aganoob/attribution": "^1.0.0",
-    "@aganoob/cli": "^2.2.2",
+    "@aganoob/cli": "^2.3.1",
     "@aganoob/components": "^1.0.0",
-    "@aganoob/core": "^1.0.0",
-    "@aganoob/deployment": "^2.2.0",
-    "@aganoob/deployment-gcp-cloud-run": "^2.2.0",
+    "@aganoob/core": "^1.1.0",
+    "@aganoob/deployment": "^2.3.0",
+    "@aganoob/deployment-gcp-cloud-run": "^2.3.0",
     "@aganoob/experiments": "^1.0.0",
     "@aganoob/patterns": "^1.0.0",
-    "@aganoob/payments": "^1.0.1",
+    "@aganoob/payments": "^1.1.0",
     "@aganoob/registry": "^1.0.0",
+    "@stripe/react-stripe-js": "^6.8.2",
+    "@stripe/stripe-js": "^9.14.0",
     "next": "^15.1.6",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
@@ -36,11 +40,5 @@
     "@types/react-dom": "^19.0.8",
     "typescript": "^5.7.3",
     "vitest": "^3.0.5"
-  },
-  "pnpm": {
-    "patchedDependencies": {
-      "@aganoob/cli@2.2.2": "patches/@aganoob__cli@2.2.2.patch",
-      "@aganoob/deployment-gcp-cloud-run@2.2.0": "patches/@aganoob__deployment-gcp-cloud-run@2.2.0.patch"
-    }
   }
 }
