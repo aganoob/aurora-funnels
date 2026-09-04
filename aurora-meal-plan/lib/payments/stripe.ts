@@ -49,14 +49,23 @@ export async function createStripeCheckout({ request, input, offer, conversionCo
   if (payment.catalogReference.startsWith("price_placeholder_")) throw new Error(`Stripe price is not configured for offer ${input.offerId}`);
   const presentation = payment.presentation ?? "embedded";
   const metadata = checkoutMetadata(input, { conversionContextId });
+  const checkoutSessionMetadata = {
+    ...metadata,
+    acquisition_platform: "custom_funnel",
+    offer_id: input.offerId,
+  };
+  const subscriptionMetadata = {
+    acquisition_platform: "custom_funnel",
+    funnel_session_id: input.sessionId,
+  };
   const returnUrl = `${origin}/f/${input.funnelId}?checkout=return&provider=stripe&session_id={CHECKOUT_SESSION_ID}`;
   const params: Stripe.Checkout.SessionCreateParams = {
     mode: "subscription",
     line_items: [{ price: payment.catalogReference, quantity: 1 }],
     customer_email: input.email,
     client_reference_id: input.sessionId,
-    ...(payment.trialDays ? { subscription_data: { trial_period_days: payment.trialDays, metadata: { ...metadata, offer_id: input.offerId } } } : { subscription_data: { metadata: { ...metadata, offer_id: input.offerId } } }),
-    metadata: { ...metadata, offer_id: input.offerId },
+    ...(payment.trialDays ? { subscription_data: { trial_period_days: payment.trialDays, metadata: subscriptionMetadata } } : { subscription_data: { metadata: subscriptionMetadata } }),
+    metadata: checkoutSessionMetadata,
   };
   if (presentation === "embedded") {
     params.ui_mode = "embedded";
