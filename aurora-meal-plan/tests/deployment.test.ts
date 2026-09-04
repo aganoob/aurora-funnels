@@ -74,11 +74,11 @@ describe("CI/CD bootstrap", () => {
 describe("health endpoint", () => {
   afterEach(() => vi.unstubAllEnvs());
 
-  it("reports readiness outside production", async () => {
+  it("fails closed when funnel credentials are missing", async () => {
     const response = GET();
 
-    expect(response.status).toBe(200);
-    await expect(response.json()).resolves.toEqual({ ok: true });
+    expect(response.status).toBe(503);
+    await expect(response.json()).resolves.toEqual({ ok: false, status: "configuration-error" });
   });
 
   it("fails closed when production credentials are missing", async () => {

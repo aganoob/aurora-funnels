@@ -1,11 +1,12 @@
 {
-  "sdkVersion": "2.2.2",
+  "sdkVersion": "2.3.1",
   "runtimeContract": "provider-checkout-v1",
   "preset": "next-docker-caddy",
   "migrations": [
     "upgrade:latest",
     "meta-v2",
-    "proxy-caddy-v1"
+    "proxy-caddy-v1",
+    "upgrade:2.3.1"
   ],
   "deploymentRequirements": {
     "buildEnvironment": [

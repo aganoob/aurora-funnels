@@ -1,10 +1,4 @@
 import { describe, expect, it, vi } from "vitest";
-
-const { deliver } = vi.hoisted(() => ({
-  deliver: vi.fn(async () => [{ status: "disabled", provider: "posthog" }]),
-}));
-
-vi.mock("../lib/analytics-server", () => ({ serverAnalytics: { deliver } }));
 vi.mock("../funnels/registry", () => ({ funnelProducts: { "aurora-meal-plan": "aurora-meal-plan" } }));
 
 import { POST } from "../app/api/track/route";
@@ -35,8 +29,7 @@ describe("analytics tracking route", () => {
     const response = await POST(requestFor(event));
 
     expect(response.status).toBe(202);
-    await expect(response.json()).resolves.toEqual({ accepted: true, providers: [{ status: "disabled", provider: "posthog" }] });
-    expect(deliver).toHaveBeenCalledWith(event, expect.any(Request));
+    await expect(response.json()).resolves.toEqual({ accepted: true, event_id: "event-1", delivery: "browser-only" });
   });
 
   it("identifies an unknown funnel ID", async () => {

@@ -35,37 +35,38 @@ describe("checkout route", () => {
 
   it("reports an invalid Stripe price configuration without calling Stripe", async () => {
     vi.stubEnv("STRIPE_SECRET_KEY", "sk_test_example");
-    productById.mockReturnValue({ offers: { annual: { stripePriceId: "prod_instead_of_price" } } });
+    productById.mockReturnValue({ offers: { annual: { payment: { provider: "stripe", catalogReference: "price_placeholder_annual", presentation: "embedded" } } } });
 
     const response = await POST(requestFor());
 
-    expect(response.status).toBe(503);
-    await expect(response.json()).resolves.toEqual({ error: "Checkout is temporarily unavailable", code: "invalid_price_configuration" });
+    expect(response.status).toBe(400);
+    await expect(response.json()).resolves.toEqual({ error: "Stripe price is not configured for offer annual" });
     expect(create).not.toHaveBeenCalled();
   });
 
-  it("returns a recoverable response when Stripe rejects checkout creation", async () => {
+  it("returns an API error when Stripe rejects checkout creation", async () => {
     vi.stubEnv("STRIPE_SECRET_KEY", "sk_test_example");
-    productById.mockReturnValue({ offers: { annual: { stripePriceId: "price_annual" } } });
+    productById.mockReturnValue({ offers: { annual: { payment: { provider: "stripe", catalogReference: "price_annual", presentation: "embedded" } } } });
     create.mockRejectedValue({ type: "StripeInvalidRequestError", code: "resource_missing", statusCode: 404 });
 
     const response = await POST(requestFor());
 
-    expect(response.status).toBe(502);
-    await expect(response.json()).resolves.toEqual({ error: "Checkout is temporarily unavailable", code: "payment_provider_error" });
+    expect(response.status).toBe(400);
+    await expect(response.json()).resolves.toEqual({ error: "Checkout creation failed" });
   });
 
-  it("returns customers to the thank-you page after a successful checkout", async () => {
+  it("returns an embedded checkout presentation after a successful checkout", async () => {
     vi.stubEnv("STRIPE_SECRET_KEY", "sk_test_example");
-    vi.stubEnv("NEXT_PUBLIC_APP_URL", "http://localhost:3000");
-    productById.mockReturnValue({ offers: { annual: { stripePriceId: "price_annual" } } });
-    create.mockResolvedValue({ id: "cs_test_123", url: "https://checkout.stripe.com/c/pay/cs_test_123" });
+    productById.mockReturnValue({ offers: { annual: { payment: { provider: "stripe", catalogReference: "price_annual", presentation: "embedded" } } } });
+    create.mockResolvedValue({ id: "cs_test_123", client_secret: "cs_test_secret" });
 
     const response = await POST(requestFor());
 
     expect(response.status).toBe(200);
+    await expect(response.json()).resolves.toEqual({ kind: "embedded", provider: "stripe", reference: "cs_test_123", clientSecret: "cs_test_secret" });
     expect(create).toHaveBeenCalledWith(expect.objectContaining({
-      success_url: "http://localhost:3000/thank-you?session_id={CHECKOUT_SESSION_ID}",
-    }));
+      ui_mode: "embedded",
+      return_url: "http://localhost:3000/f/aurora-meal-plan?checkout=return&provider=stripe&session_id={CHECKOUT_SESSION_ID}",
+    }), { idempotencyKey: "shipflow:session-1:annual" });
   });
 });

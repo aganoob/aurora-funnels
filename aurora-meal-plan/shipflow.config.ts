@@ -1,6 +1,6 @@
 import { defineMetaConfig } from "@aganoob/analytics-meta";
 
-export const shipflowConfig = { sdkVersion: "2.2.2", preset: "next-docker-caddy", domains: ["begin.aurorafirst.ai", "preview-begin.aurorafirst.ai"] ,
+export const shipflowConfig = { sdkVersion: "2.3.1", preset: "next-docker-caddy", domains: ["begin.aurorafirst.ai", "preview-begin.aurorafirst.ai"] ,
   analytics: {
     meta: defineMetaConfig({
       datasetId: process.env.NEXT_PUBLIC_META_DATASET_ID,
