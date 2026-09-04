@@ -67,6 +67,37 @@ describe("checkout route", () => {
     expect(create).toHaveBeenCalledWith(expect.objectContaining({
       ui_mode: "embedded",
       return_url: "http://localhost:3000/f/aurora-meal-plan?checkout=return&provider=stripe&session_id={CHECKOUT_SESSION_ID}",
+      client_reference_id: "session-1",
+      metadata: expect.objectContaining({
+        acquisition_platform: "custom_funnel",
+        funnel_session_id: "session-1",
+        funnel_id: "aurora-meal-plan",
+        product_id: "aurora-meal-plan",
+      }),
+      subscription_data: {
+        metadata: {
+          acquisition_platform: "custom_funnel",
+          funnel_session_id: "session-1",
+        },
+      },
     }), { idempotencyKey: "shipflow:session-1:annual" });
+  });
+
+  it("keeps funnel correlation metadata when the subscription starts with a trial", async () => {
+    vi.stubEnv("STRIPE_SECRET_KEY", "sk_test_example");
+    productById.mockReturnValue({ offers: { annual: { payment: { provider: "stripe", catalogReference: "price_annual", presentation: "embedded", trialDays: 5 } } } });
+    create.mockResolvedValue({ id: "cs_test_123", client_secret: "cs_test_secret" });
+
+    await POST(requestFor());
+
+    expect(create).toHaveBeenCalledWith(expect.objectContaining({
+      subscription_data: {
+        trial_period_days: 5,
+        metadata: {
+          acquisition_platform: "custom_funnel",
+          funnel_session_id: "session-1",
+        },
+      },
+    }), expect.anything());
   });
 });
