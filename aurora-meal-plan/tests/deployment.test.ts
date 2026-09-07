@@ -63,8 +63,15 @@ describe("CI/CD bootstrap", () => {
     const bootstrap = await readFile(resolve(process.cwd(), "scripts/bootstrap-gcp-cicd.sh"), "utf8");
 
     expect(bootstrap).toContain("gcloud storage buckets add-iam-policy-binding");
+    expect(bootstrap).toContain('--condition=None --quiet');
     expect(bootstrap).toContain('source_bucket="${project_id}_cloudbuild"');
     expect(bootstrap).toContain('gcloud builds get-default-service-account --project "$project_id"');
+    expect(bootstrap).toContain(
+      'grant_project_role "serviceAccount:${deploy_email}" roles/storage.bucketViewer',
+    );
+    expect(bootstrap).not.toContain(
+      'grant_bucket_role "serviceAccount:${deploy_email}" roles/storage.bucketViewer',
+    );
     expect(bootstrap).toContain('roles/storage.bucketViewer "$source_bucket"');
     expect(bootstrap).toContain('roles/storage.objectUser "$source_bucket"');
     expect(bootstrap).toContain('roles/storage.objectViewer "$source_bucket"');
