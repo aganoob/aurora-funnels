@@ -104,6 +104,8 @@ ensure_cloudbuild_source_bucket() {
   fi
 }
 
+source_bucket="${project_id}_cloudbuild"
+
 for environment in staging production; do
   if [ "$environment" = staging ]; then
     service="aurora-meal-staging"
@@ -113,7 +115,13 @@ for environment in staging production; do
 
   pnpm shipflow deploy setup --environment "$environment" --yes --non-interactive
 
-  ensure_cloudbuild_source_bucket "${project_id}_cloudbuild"
+  if [ -z "${default_cloudbuild_email:-}" ]; then
+    ensure_cloudbuild_source_bucket "$source_bucket"
+    default_cloudbuild_email="$(gcloud builds get-default-service-account --project "$project_id")"
+    grant_bucket_role "serviceAccount:${default_cloudbuild_email}" roles/storage.bucketViewer "$source_bucket"
+    grant_bucket_role "serviceAccount:${default_cloudbuild_email}" roles/storage.objectUser "$source_bucket"
+    grant_bucket_legacy_writer "$default_cloudbuild_email" "$source_bucket"
+  fi
 
   IFS=$'\t' read -r build_account runtime_account <<<"$(environment_names "$environment" "$service")"
   deploy_account="github-${environment}-deployer"
@@ -146,10 +154,10 @@ for environment in staging production; do
   grant_project_role "serviceAccount:${deploy_email}" roles/cloudbuild.builds.editor
   grant_project_role "serviceAccount:${deploy_email}" roles/serviceusage.serviceUsageConsumer
   grant_service_role "serviceAccount:${deploy_email}" roles/run.admin "$service"
-  grant_bucket_role "serviceAccount:${deploy_email}" roles/storage.bucketViewer "${project_id}_cloudbuild"
-  grant_bucket_role "serviceAccount:${deploy_email}" roles/storage.objectUser "${project_id}_cloudbuild"
-  grant_bucket_role "serviceAccount:${build_email}" roles/storage.objectViewer "${project_id}_cloudbuild"
-  grant_bucket_legacy_writer "$deploy_email" "${project_id}_cloudbuild"
+  grant_bucket_role "serviceAccount:${deploy_email}" roles/storage.bucketViewer "$source_bucket"
+  grant_bucket_role "serviceAccount:${deploy_email}" roles/storage.objectUser "$source_bucket"
+  grant_bucket_role "serviceAccount:${build_email}" roles/storage.objectViewer "$source_bucket"
+  grant_bucket_legacy_writer "$deploy_email" "$source_bucket"
 
   gcloud secrets add-iam-policy-binding "shipflow-${environment}-npm-token" \
     --project "$project_id" \

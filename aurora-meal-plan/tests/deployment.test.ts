@@ -59,13 +59,15 @@ describe("production deployment", () => {
 });
 
 describe("CI/CD bootstrap", () => {
-  it("grants source-staging bucket access to deployment identities", async () => {
+  it("grants source-staging bucket access to all Cloud Build identities", async () => {
     const bootstrap = await readFile(resolve(process.cwd(), "scripts/bootstrap-gcp-cicd.sh"), "utf8");
 
     expect(bootstrap).toContain("gcloud storage buckets add-iam-policy-binding");
-    expect(bootstrap).toContain('roles/storage.bucketViewer "${project_id}_cloudbuild"');
-    expect(bootstrap).toContain('roles/storage.objectUser "${project_id}_cloudbuild"');
-    expect(bootstrap).toContain('roles/storage.objectViewer "${project_id}_cloudbuild"');
+    expect(bootstrap).toContain('source_bucket="${project_id}_cloudbuild"');
+    expect(bootstrap).toContain('gcloud builds get-default-service-account --project "$project_id"');
+    expect(bootstrap).toContain('roles/storage.bucketViewer "$source_bucket"');
+    expect(bootstrap).toContain('roles/storage.objectUser "$source_bucket"');
+    expect(bootstrap).toContain('roles/storage.objectViewer "$source_bucket"');
     expect(bootstrap).toContain('entity=user-${account},role=WRITER');
     expect(bootstrap).toContain('gcloud storage buckets create "gs://${bucket}" --location US');
   });
