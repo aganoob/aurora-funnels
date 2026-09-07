@@ -9,7 +9,7 @@ Pull request → CI (types, tests, build) → merge to main
   → staging release → production-environment approval → production release
 ```
 
-The deployment workflow validates the source, builds an image in Cloud Build, deploys it to the environment's Cloud Run service, and runs Shipflow's deployment doctor. Staging and production use independent Cloud Run services and Secret Manager values.
+The deployment workflow validates the source, builds an image in Cloud Build, deploys it to the environment's Cloud Run service, confirms the deployed service status, and probes its health endpoint. Staging and production use independent Cloud Run services and Secret Manager values.
 
 | Environment | Cloud Run service | Custom domain |
 | --- | --- | --- |

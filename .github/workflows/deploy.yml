@@ -74,7 +74,9 @@ jobs:
         run: pnpm shipflow deploy release --environment staging --yes --non-interactive
 
       - name: Verify staging
-        run: pnpm shipflow deploy doctor --environment staging
+        run: |
+          pnpm shipflow deploy status --environment staging --json
+          curl --fail-with-body --show-error --silent --retry 4 --retry-all-errors --retry-delay 2 "$SHIPFLOW_PUBLIC_URL/api/health"
 
   production:
     needs: staging
@@ -140,4 +142,6 @@ jobs:
         run: pnpm shipflow deploy release --environment production --yes --non-interactive
 
       - name: Verify production
-        run: pnpm shipflow deploy doctor --environment production
+        run: |
+          pnpm shipflow deploy status --environment production --json
+          curl --fail-with-body --show-error --silent --retry 4 --retry-all-errors --retry-delay 2 "$SHIPFLOW_PUBLIC_URL/api/health"
