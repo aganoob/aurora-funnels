@@ -87,10 +87,21 @@ describe("CI/CD bootstrap", () => {
     expect(bootstrap).toContain('gcloud storage buckets create "gs://${bucket}" --location US');
   });
 
-  it("keeps the Docker dependency layer aligned with the current lockfile inputs", async () => {
+  it("copies patched dependency inputs before the frozen Docker install", async () => {
     const dockerfile = await readFile(resolve(process.cwd(), "Dockerfile"), "utf8");
 
-    expect(dockerfile).not.toContain("COPY patches ./patches");
+    expect(dockerfile).toContain("COPY patches ./patches");
+  });
+
+  it("limits candidate tags to Cloud Run's combined service and tag length", async () => {
+    const cli = await readFile(
+      resolve(process.cwd(), "node_modules/@aganoob/cli/bin/shipflow.mjs"),
+      "utf8",
+    );
+
+    expect(cli).toContain("const maxLength = 46 - serviceName.length;");
+    expect(cli).toContain('candidateTag("delivery", names.deliveryService)');
+    expect(cli).toContain('candidateTag("funnel", target.service)');
   });
 });
 

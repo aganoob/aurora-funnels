@@ -1,0 +1,35 @@
+diff --git a/bin/shipflow.mjs b/bin/shipflow.mjs
+index 5a57cce0de6ff503b43085f8bce5e8c39934b356..b41c7a086772fe06a092c93b0e4479260e5a0a4c 100755
+--- a/bin/shipflow.mjs
++++ b/bin/shipflow.mjs
+@@ -453,8 +453,10 @@ async function releasePreflight(context) {
+   return manifest;
+ }
+ 
+-function candidateTag(role) {
+-  return `shipflow-${role}-${Date.now()}-${randomBytes(3).toString("hex")}`;
++function candidateTag(role, serviceName) {
++  const maxLength = 46 - serviceName.length;
++  if (maxLength < 2) throw new Error(`Cloud Run service name ${serviceName} is too long to create a candidate tag.`);
++  return `${role[0]}${randomBytes(8).toString("hex").slice(0, maxLength - 1)}`;
+ }
+ 
+ function readyCandidate(context, serviceName, tag) {
+@@ -512,7 +514,7 @@ async function deploymentRelease(context, options) {
+     }
+     if (!deliveryService.status?.url) throw new Error("Managed delivery service did not expose an internal URL.");
+     deliveryEnv.push(`SHIPFLOW_DELIVERY_WORKER_URL=${deliveryService.status.url}/internal/tasks/deliver`);
+-    const deliveryTag = candidateTag("delivery");
++    const deliveryTag = candidateTag("delivery", names.deliveryService);
+     runGcloud(["run", "deploy", names.deliveryService, "--image", image, ...gcpProjectArguments(context), "--port", "3000", "--service-account", `${names.deliveryServiceAccount}@${target.projectId}.iam.gserviceaccount.com`, "--set-env-vars", deliveryEnv.join(","), "--set-secrets", `SHIPFLOW_DELIVERY_ENCRYPTION_KEY=${names.encryptionSecret}:latest,META_CAPI_ACCESS_TOKEN=${deploymentSecretName(context.environmentName, "meta-capi-access-token")}:latest,POSTHOG_PROJECT_API_KEY=${deploymentSecretName(context.environmentName, "posthog-project-api-key")}:latest`, "--no-allow-unauthenticated", "--no-traffic", "--tag", deliveryTag, "--startup-probe", "httpGet.path=/api/health,httpGet.port=3000"]);
+     const deliveryCandidate = readyCandidate(context, names.deliveryService, deliveryTag);
+     for (const account of [names.funnelServiceAccount, names.tasksServiceAccount]) runGcloud(["run", "services", "add-iam-policy-binding", names.deliveryService, ...gcpProjectArguments(context), "--member", `serviceAccount:${account}@${target.projectId}.iam.gserviceaccount.com`, "--role", "roles/run.invoker"]);
+@@ -524,7 +526,7 @@ async function deploymentRelease(context, options) {
+   const secretMappings = Object.entries(manifest.deploymentRequirements.runtimeSecrets ?? {}).map(([environmentName, suffix]) => `${environmentName}=${deploymentSecretName(context.environmentName, suffix)}:latest`);
+   if (process.env.SHIPFLOW_PRODUCT_WEBHOOK_URL) secretMappings.push(`SHIPFLOW_PRODUCT_WEBHOOK_SECRET=${deploymentSecretName(context.environmentName, "product-webhook-secret")}:latest`);
+   if (context.environment.analyticsDelivery.kind === "external-service") secretMappings.push(`SHIPFLOW_ANALYTICS_DELIVERY_HMAC_SECRET=${context.environment.analyticsDelivery.hmacSecretName}:latest`);
+-  const funnelTag = candidateTag("funnel");
++  const funnelTag = candidateTag("funnel", target.service);
+   runGcloud(["run", "deploy", target.service, "--image", image, ...gcpProjectArguments(context), "--port", "3000", "--service-account", `${names.funnelServiceAccount}@${target.projectId}.iam.gserviceaccount.com`, "--update-env-vars", [...env, ...Object.entries(productEnvironment).map(([name, value]) => `${name}=${value}`)].join(","), "--set-secrets", secretMappings.join(","), "--max", String(target.maxInstances ?? 10), "--min", String(target.minInstances ?? 0), "--concurrency", String(target.concurrency ?? 80), "--timeout", String(target.timeoutSeconds ?? 60), "--allow-unauthenticated", "--no-traffic", "--tag", funnelTag, "--startup-probe", "httpGet.path=/api/health,httpGet.port=3000"]);
+   const funnelCandidate = readyCandidate(context, target.service, funnelTag);
+   await checkCandidateHealth(funnelCandidate.url, funnelCandidate.revision);
