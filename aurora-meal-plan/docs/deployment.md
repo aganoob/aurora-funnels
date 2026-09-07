@@ -49,6 +49,7 @@ The workflow installs pnpm before `actions/setup-node` restores the pnpm cache. 
 | Build service account | `roles/artifactregistry.writer`, `roles/logging.logWriter`, `roles/secretmanager.secretAccessor` | Pushes the container, writes build logs, and reads its environment’s npm token. |
 | Runtime service account | `roles/secretmanager.secretAccessor` | Reads its environment’s Stripe, Meta, and PostHog runtime secrets. |
 | Deployer on `shipflow-<environment>-npm-token` | `roles/secretmanager.secretVersionAdder` | Refreshes the GitHub Packages token before each build. |
+| Deployer on its five `shipflow-<environment>-*` secrets | `roles/secretmanager.viewer` | Verifies enabled latest secret versions during Shipflow preflight without accessing secret values. |
 | Build account on `shipflow-<environment>-npm-token` | `roles/secretmanager.secretAccessor` | Exposes the token to Cloud Build’s npm install only. |
 | `aurora-funnels_cloudbuild` source bucket | Deployer: `roles/storage.bucketViewer` and `roles/storage.objectUser`; build account: `roles/storage.objectViewer` | Uploads and fetches the archived build source. The bootstrap creates this `US` bucket if it is absent. |
 | Legacy source-bucket ACL, when uniform bucket-level access is disabled | Deployer: bucket ACL `WRITER` | Supports Cloud Build source uploads for the legacy default source bucket. The bootstrap checks the bucket mode and applies this only when ACLs are enabled. |

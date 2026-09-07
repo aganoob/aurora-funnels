@@ -158,6 +158,11 @@ for environment in staging production; do
     --quiet >/dev/null
   gcloud secrets add-iam-policy-binding "shipflow-${environment}-npm-token" \
     --project "$project_id" \
+    --member "serviceAccount:${deploy_email}" \
+    --role roles/secretmanager.viewer \
+    --quiet >/dev/null
+  gcloud secrets add-iam-policy-binding "shipflow-${environment}-npm-token" \
+    --project "$project_id" \
     --member "serviceAccount:${build_email}" \
     --role roles/secretmanager.secretAccessor \
     --quiet >/dev/null
@@ -171,6 +176,11 @@ for environment in staging production; do
     --role roles/secretmanager.secretAccessor \
     --quiet >/dev/null 2>&1 || true
   for secret_suffix in stripe-secret-key stripe-webhook-secret meta-capi-access-token posthog-project-api-key; do
+    gcloud secrets add-iam-policy-binding "shipflow-${environment}-${secret_suffix}" \
+      --project "$project_id" \
+      --member "serviceAccount:${deploy_email}" \
+      --role roles/secretmanager.viewer \
+      --quiet >/dev/null
     gcloud secrets add-iam-policy-binding "shipflow-${environment}-${secret_suffix}" \
       --project "$project_id" \
       --member "serviceAccount:${runtime_email}" \
