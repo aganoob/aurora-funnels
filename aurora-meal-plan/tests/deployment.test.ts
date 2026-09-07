@@ -103,6 +103,18 @@ describe("CI/CD bootstrap", () => {
     expect(cli).toContain('candidateTag("delivery", names.deliveryService)');
     expect(cli).toContain('candidateTag("funnel", target.service)');
   });
+
+  it("verifies scoped service status and public health after each release", async () => {
+    const workflow = await readFile(
+      resolve(process.cwd(), "../.github/workflows/deploy.yml"),
+      "utf8",
+    );
+
+    expect(workflow).not.toContain("shipflow deploy doctor");
+    expect(workflow).toContain("shipflow deploy status --environment staging --json");
+    expect(workflow).toContain("shipflow deploy status --environment production --json");
+    expect(workflow.match(/curl --fail-with-body/g)).toHaveLength(2);
+  });
 });
 
 describe("health endpoint", () => {
