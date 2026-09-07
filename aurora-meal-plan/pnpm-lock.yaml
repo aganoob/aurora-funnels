@@ -4,6 +4,11 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+patchedDependencies:
+  '@aganoob/cli@2.3.1':
+    hash: dc05f61bbaf9c38ff4bb4c239f60abd2e286b2ea82fc4572f38909c5c0fac08a
+    path: patches/@aganoob__cli@2.3.1.patch
+
 importers:
 
   .:
@@ -25,7 +30,7 @@ importers:
         version: 1.0.0
       '@aganoob/cli':
         specifier: ^2.3.1
-        version: 2.3.1
+        version: 2.3.1(patch_hash=dc05f61bbaf9c38ff4bb4c239f60abd2e286b2ea82fc4572f38909c5c0fac08a)
       '@aganoob/components':
         specifier: ^1.0.0
         version: 1.0.0(@aganoob/core@1.1.0(react@19.2.8))(react@19.2.8)
@@ -1220,7 +1225,7 @@ snapshots:
 
   '@aganoob/attribution@1.0.0': {}
 
-  '@aganoob/cli@2.3.1':
+  '@aganoob/cli@2.3.1(patch_hash=dc05f61bbaf9c38ff4bb4c239f60abd2e286b2ea82fc4572f38909c5c0fac08a)':
     dependencies:
       '@aganoob/deployment': 2.3.0
       '@aganoob/deployment-gcp-cloud-run': 2.3.0
