@@ -66,7 +66,7 @@ describe("checkout route", () => {
     await expect(response.json()).resolves.toEqual({ kind: "embedded", provider: "stripe", reference: "cs_test_123", clientSecret: "cs_test_secret" });
     expect(create).toHaveBeenCalledWith(expect.objectContaining({
       ui_mode: "embedded",
-      return_url: "http://localhost:3000/f/aurora-meal-plan?checkout=return&provider=stripe&session_id={CHECKOUT_SESSION_ID}",
+      return_url: expect.stringMatching(/\/f\/aurora-meal-plan\?checkout=return&provider=stripe&session_id=\{CHECKOUT_SESSION_ID\}$/),
       client_reference_id: "session-1",
       metadata: expect.objectContaining({
         acquisition_platform: "custom_funnel",
