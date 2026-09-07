@@ -51,8 +51,8 @@ The workflow installs pnpm before `actions/setup-node` restores the pnpm cache. 
 | Deployer on `shipflow-<environment>-npm-token` | `roles/secretmanager.secretVersionAdder` | Refreshes the GitHub Packages token before each build. |
 | Deployer on its five `shipflow-<environment>-*` secrets | `roles/secretmanager.viewer` | Verifies enabled latest secret versions during Shipflow preflight without accessing secret values. |
 | Build account on `shipflow-<environment>-npm-token` | `roles/secretmanager.secretAccessor` | Exposes the token to Cloud Build’s npm install only. |
-| `aurora-funnels_cloudbuild` source bucket | Deployer: `roles/storage.bucketViewer` and `roles/storage.objectUser`; build account: `roles/storage.objectViewer` | Uploads and fetches the archived build source. The bootstrap creates this `US` bucket if it is absent. |
-| Legacy source-bucket ACL, when uniform bucket-level access is disabled | Deployer: bucket ACL `WRITER` | Supports Cloud Build source uploads for the legacy default source bucket. The bootstrap checks the bucket mode and applies this only when ACLs are enabled. |
+| `aurora-funnels_cloudbuild` source bucket | Deployer and default Cloud Build account: `roles/storage.bucketViewer` and `roles/storage.objectUser`; custom build account: `roles/storage.objectViewer` | Uploads and fetches the archived build source. The bootstrap creates this `US` bucket if it is absent. |
+| Legacy source-bucket ACL, when uniform bucket-level access is disabled | Deployer and default Cloud Build account: bucket ACL `WRITER` | Supports Cloud Build source uploads for the legacy default source bucket. The bootstrap checks the bucket mode and applies this only when ACLs are enabled. |
 
 The Cloud Build service agent remains project-managed through `roles/cloudbuild.serviceAgent`. A same-project custom build identity does not need an additional service-account token-creator binding. Cross-project custom build identities do require `roles/iam.serviceAccountTokenCreator` for the Cloud Build service agent in the identity’s project.
 
@@ -150,7 +150,7 @@ Shipflow moves all production traffic to the newest ready revision that is outsi
 | --- | --- | --- |
 | `Unable to locate executable file: pnpm` | Deployment workflow order | Run `pnpm/action-setup` before `actions/setup-node` when the Node action caches pnpm. |
 | `invalid_target` from `google-github-actions/auth` | `GCP_WORKLOAD_IDENTITY_PROVIDER` and the `github-actions` pool/provider | Ensure the provider exists, its repository/branch/environment conditions match the workflow, and the matching deployer account has `roles/iam.workloadIdentityUser`. |
-| `gcloud builds submit` cannot access its source-staging bucket | `aurora-funnels_cloudbuild` bucket IAM and ACL | Re-run `./scripts/bootstrap-gcp-cicd.sh`. It creates the bucket when absent, grants each deployer `roles/storage.bucketViewer` and `roles/storage.objectUser`, plus `roles/storage.objectViewer` to its build account. Buckets that still use legacy ACLs also grant each deployer `WRITER`. |
+| `gcloud builds submit` cannot access its source-staging bucket | `aurora-funnels_cloudbuild` bucket IAM and ACL | Re-run `./scripts/bootstrap-gcp-cicd.sh`. It grants the default Cloud Build account and each deployer `roles/storage.bucketViewer` and `roles/storage.objectUser`, plus `roles/storage.objectViewer` to each custom build account. Buckets that still use legacy ACLs also grant the default Cloud Build account and each deployer `WRITER`. |
 | Custom domain remains pending | `gcloud beta run domain-mappings describe` | Create the returned DNS record and wait for Google-managed certificate issuance. |
 
 ## Custom domains
