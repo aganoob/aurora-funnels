@@ -64,6 +64,9 @@ describe("CI/CD bootstrap", () => {
 
     expect(bootstrap).toContain("gcloud storage buckets add-iam-policy-binding");
     expect(bootstrap).toContain('gcloud run services add-iam-policy-binding "$service"');
+    expect(bootstrap).toContain(
+      'gcloud artifacts repositories add-iam-policy-binding "$repository"',
+    );
     expect(bootstrap).not.toContain("resource.type == 'run.googleapis.com/Service'");
     expect(bootstrap).toContain('--condition=None --quiet');
     expect(bootstrap).toContain('source_bucket="${project_id}_cloudbuild"');
@@ -77,6 +80,9 @@ describe("CI/CD bootstrap", () => {
     expect(bootstrap).toContain('roles/storage.bucketViewer "$source_bucket"');
     expect(bootstrap).toContain('roles/storage.objectUser "$source_bucket"');
     expect(bootstrap).toContain('roles/storage.objectViewer "$source_bucket"');
+    expect(bootstrap).toContain(
+      'grant_repository_role "serviceAccount:${deploy_email}" roles/artifactregistry.reader "$artifact_repository"',
+    );
     expect(bootstrap).toContain('entity=user-${account},role=WRITER');
     expect(bootstrap).toContain('gcloud storage buckets create "gs://${bucket}" --location US');
   });

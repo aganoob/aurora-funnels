@@ -84,6 +84,19 @@ grant_service_role() {
     --quiet >/dev/null
 }
 
+grant_repository_role() {
+  local member="$1"
+  local role="$2"
+  local repository="$3"
+  gcloud artifacts repositories add-iam-policy-binding "$repository" \
+    --project "$project_id" \
+    --location "$region" \
+    --member "$member" \
+    --role "$role" \
+    --condition=None \
+    --quiet >/dev/null
+}
+
 grant_bucket_role() {
   local member="$1"
   local role="$2"
@@ -108,6 +121,7 @@ ensure_cloudbuild_source_bucket() {
   fi
 }
 
+artifact_repository="shipflow"
 source_bucket="${project_id}_cloudbuild"
 
 for environment in staging production; do
@@ -159,6 +173,7 @@ for environment in staging production; do
   grant_project_role "serviceAccount:${deploy_email}" roles/serviceusage.serviceUsageConsumer
   grant_project_role "serviceAccount:${deploy_email}" roles/storage.bucketViewer
   grant_service_role "serviceAccount:${deploy_email}" roles/run.admin "$service"
+  grant_repository_role "serviceAccount:${deploy_email}" roles/artifactregistry.reader "$artifact_repository"
   grant_bucket_role "serviceAccount:${deploy_email}" roles/storage.objectUser "$source_bucket"
   grant_bucket_role "serviceAccount:${build_email}" roles/storage.objectViewer "$source_bucket"
   grant_bucket_legacy_writer "$deploy_email" "$source_bucket"
