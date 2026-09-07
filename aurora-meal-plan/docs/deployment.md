@@ -45,6 +45,7 @@ The workflow installs pnpm before `actions/setup-node` restores the pnpm cache. 
 | GitHub staging/production OIDC principal | `roles/iam.workloadIdentityUser` on its matching deployer service account | Allows the GitHub environment to impersonate only its matching deployer. |
 | `github-<environment>-deployer` | `roles/cloudbuild.builds.editor`, `roles/serviceusage.serviceUsageConsumer` | Creates builds and consumes enabled Google APIs. |
 | `github-<environment>-deployer` | `roles/run.admin`, granted on its one Cloud Run service | Deploys staging only to `aurora-meal-staging` and production only to `aurora-meal-production`. |
+| `github-<environment>-deployer` | `roles/artifactregistry.reader`, granted on the `shipflow` repository | Resolves and deploys the image produced by Cloud Build. |
 | `github-<environment>-deployer` | `roles/iam.serviceAccountUser` on its build and runtime accounts | Allows a release to select the dedicated Cloud Build and Cloud Run runtime identities. |
 | Build service account | `roles/artifactregistry.writer`, `roles/logging.logWriter`, `roles/secretmanager.secretAccessor` | Pushes the container, writes build logs, and reads its environment’s npm token. |
 | Runtime service account | `roles/secretmanager.secretAccessor` | Reads its environment’s Stripe, Meta, and PostHog runtime secrets. |
