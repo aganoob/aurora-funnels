@@ -63,6 +63,8 @@ describe("CI/CD bootstrap", () => {
     const bootstrap = await readFile(resolve(process.cwd(), "scripts/bootstrap-gcp-cicd.sh"), "utf8");
 
     expect(bootstrap).toContain("gcloud storage buckets add-iam-policy-binding");
+    expect(bootstrap).toContain('gcloud run services add-iam-policy-binding "$service"');
+    expect(bootstrap).not.toContain("resource.type == 'run.googleapis.com/Service'");
     expect(bootstrap).toContain('--condition=None --quiet');
     expect(bootstrap).toContain('source_bucket="${project_id}_cloudbuild"');
     expect(bootstrap).toContain('gcloud builds get-default-service-account --project "$project_id"');

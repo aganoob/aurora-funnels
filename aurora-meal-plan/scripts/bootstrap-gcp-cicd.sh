@@ -75,9 +75,13 @@ grant_service_role() {
   local member="$1"
   local role="$2"
   local service="$3"
-  local title="GitHub${service//-/}"
-  local condition="expression=resource.type == 'run.googleapis.com/Service' && resource.name == 'projects/${project_id}/locations/${region}/services/${service}',title=${title},description=Allow GitHub deployments for ${service}"
-  gcloud projects add-iam-policy-binding "$project_id" --member "$member" --role "$role" --condition "$condition" --quiet >/dev/null
+  gcloud run services add-iam-policy-binding "$service" \
+    --project "$project_id" \
+    --region "$region" \
+    --member "$member" \
+    --role "$role" \
+    --condition=None \
+    --quiet >/dev/null
 }
 
 grant_bucket_role() {

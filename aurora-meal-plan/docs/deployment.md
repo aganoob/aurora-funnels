@@ -29,7 +29,7 @@ The pool `github-actions` and provider `aurora-funnels` accept OIDC tokens only 
 | `staging` | `github-staging-deployer@aurora-funnels.iam.gserviceaccount.com` | Cloud Build, the staging build/runtime identities, the staging npm-token secret, and `aurora-meal-staging` |
 | `production` | `github-production-deployer@aurora-funnels.iam.gserviceaccount.com` | Cloud Build, the production build/runtime identities, the production npm-token secret, and `aurora-meal-production` |
 
-Each deployer has Cloud Run admin access conditioned on its single service. This preserves the production approval gate and prevents staging jobs from deploying production.
+Each deployer has Cloud Run admin access on its single service. This preserves the production approval gate and prevents staging jobs from deploying production.
 
 The workflow installs pnpm before `actions/setup-node` restores the pnpm cache. Keep that ordering whenever the workflow changes.
 
@@ -44,7 +44,7 @@ The workflow installs pnpm before `actions/setup-node` restores the pnpm cache. 
 | GitHub OIDC provider | Attribute mapping for repository ID, owner ID, branch, and GitHub environment | The provider accepts only this repository’s `main` branch with the `staging` or `production` environment. |
 | GitHub staging/production OIDC principal | `roles/iam.workloadIdentityUser` on its matching deployer service account | Allows the GitHub environment to impersonate only its matching deployer. |
 | `github-<environment>-deployer` | `roles/cloudbuild.builds.editor`, `roles/serviceusage.serviceUsageConsumer` | Creates builds and consumes enabled Google APIs. |
-| `github-<environment>-deployer` | `roles/run.admin`, conditioned on its one Cloud Run service | Deploys staging only to `aurora-meal-staging` and production only to `aurora-meal-production`. |
+| `github-<environment>-deployer` | `roles/run.admin`, granted on its one Cloud Run service | Deploys staging only to `aurora-meal-staging` and production only to `aurora-meal-production`. |
 | `github-<environment>-deployer` | `roles/iam.serviceAccountUser` on its build and runtime accounts | Allows a release to select the dedicated Cloud Build and Cloud Run runtime identities. |
 | Build service account | `roles/artifactregistry.writer`, `roles/logging.logWriter`, `roles/secretmanager.secretAccessor` | Pushes the container, writes build logs, and reads its environment’s npm token. |
 | Runtime service account | `roles/secretmanager.secretAccessor` | Reads its environment’s Stripe, Meta, and PostHog runtime secrets. |
