@@ -78,6 +78,12 @@ describe("CI/CD bootstrap", () => {
     expect(bootstrap).toContain('entity=user-${account},role=WRITER');
     expect(bootstrap).toContain('gcloud storage buckets create "gs://${bucket}" --location US');
   });
+
+  it("keeps the Docker dependency layer aligned with the current lockfile inputs", async () => {
+    const dockerfile = await readFile(resolve(process.cwd(), "Dockerfile"), "utf8");
+
+    expect(dockerfile).not.toContain("COPY patches ./patches");
+  });
 });
 
 describe("health endpoint", () => {
