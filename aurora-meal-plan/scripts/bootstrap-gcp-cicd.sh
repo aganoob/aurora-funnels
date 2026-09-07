@@ -68,7 +68,7 @@ ensure_secret() {
 grant_project_role() {
   local member="$1"
   local role="$2"
-  gcloud projects add-iam-policy-binding "$project_id" --member "$member" --role "$role" --quiet >/dev/null
+  gcloud projects add-iam-policy-binding "$project_id" --member "$member" --role "$role" --condition=None --quiet >/dev/null
 }
 
 grant_service_role() {
@@ -153,8 +153,8 @@ for environment in staging production; do
 
   grant_project_role "serviceAccount:${deploy_email}" roles/cloudbuild.builds.editor
   grant_project_role "serviceAccount:${deploy_email}" roles/serviceusage.serviceUsageConsumer
+  grant_project_role "serviceAccount:${deploy_email}" roles/storage.bucketViewer
   grant_service_role "serviceAccount:${deploy_email}" roles/run.admin "$service"
-  grant_bucket_role "serviceAccount:${deploy_email}" roles/storage.bucketViewer "$source_bucket"
   grant_bucket_role "serviceAccount:${deploy_email}" roles/storage.objectUser "$source_bucket"
   grant_bucket_role "serviceAccount:${build_email}" roles/storage.objectViewer "$source_bucket"
   grant_bucket_legacy_writer "$deploy_email" "$source_bucket"
