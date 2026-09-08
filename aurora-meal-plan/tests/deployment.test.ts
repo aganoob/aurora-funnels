@@ -92,6 +92,15 @@ describe("CI/CD bootstrap", () => {
     expect(dockerfile).toContain("COPY patches ./patches");
   });
 
+  it("embeds the Stripe publishable key in the browser build", async () => {
+    const dockerfile = await readFile(resolve(process.cwd(), "Dockerfile"), "utf8");
+
+    expect(dockerfile).toContain("ARG NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY");
+    expect(dockerfile).toContain(
+      "NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=$NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY",
+    );
+  });
+
   it("limits candidate tags to Cloud Run's combined service and tag length", async () => {
     const cli = await readFile(
       resolve(process.cwd(), "node_modules/@aganoob/cli/bin/shipflow.mjs"),
