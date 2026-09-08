@@ -1,12 +1,12 @@
 # Deployments
 
-`main` releases to staging automatically. You can also open **Actions → Deploy Aurora meal plan → Run workflow**, select any workflow branch, and optionally enter a branch, tag, or commit SHA in `source_ref` to deploy that exact revision to staging. Production runs only from an automatic `main` push: it follows a successful staging release and waits for the GitHub production-environment approval.
+`main` releases to staging automatically. You can also open **Actions → Deploy Aurora meal plan → Run workflow**, select any workflow branch, and optionally enter a branch, tag, or commit SHA in `source_ref` to deploy that exact revision to staging. Production runs only from an automatic `main` push and follows a successful staging release.
 
 ## Release flow
 
 ```text
 Pull request → CI (types, tests, build) → merge to main
-  → staging release → production-environment approval → production release
+  → staging release → production release
 ```
 
 The deployment workflow validates the source, builds an image in Cloud Build, deploys it to the environment's Cloud Run service, confirms the deployed service status, and probes its health endpoint. Staging and production use independent Cloud Run services and Secret Manager values.
@@ -16,7 +16,7 @@ The deployment workflow validates the source, builds an image in Cloud Build, de
 | Staging | `aurora-meal-staging` | `preview-begin.aurorafirst.ai` |
 | Production | `aurora-meal-production` | `begin.aurorafirst.ai` |
 
-Use the production-environment approval as the release gate. A successful staging release is required before the production job can run.
+A successful staging release is the production release gate.
 
 ## GitHub Actions access to Google Cloud
 
@@ -29,7 +29,7 @@ The pool `github-actions` and provider `aurora-funnels` accept OIDC tokens only 
 | `staging` | `github-staging-deployer@aurora-funnels.iam.gserviceaccount.com` | Cloud Build, the staging build/runtime identities, the staging npm-token secret, and `aurora-meal-staging` |
 | `production` | `github-production-deployer@aurora-funnels.iam.gserviceaccount.com` | Cloud Build, the production build/runtime identities, the production npm-token secret, and `aurora-meal-production` |
 
-Each deployer has Cloud Run admin access on its single service. This preserves the production approval gate and prevents staging jobs from deploying production.
+Each deployer has Cloud Run admin access on its single service. This prevents staging jobs from deploying production.
 
 The workflow installs pnpm before `actions/setup-node` restores the pnpm cache. Keep that ordering whenever the workflow changes.
 
