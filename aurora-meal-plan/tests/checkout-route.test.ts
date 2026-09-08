@@ -8,6 +8,9 @@ const { create, productById } = vi.hoisted(() => ({
 vi.mock("stripe", () => ({
   default: vi.fn().mockImplementation(() => ({ checkout: { sessions: { create } } })),
 }));
+vi.mock("../funnels/catalog", () => {
+  throw new Error("Server checkout must not import the client funnel catalog");
+});
 vi.mock("../lib/products", () => ({ productById }));
 
 import { POST } from "../app/api/checkout/route";
