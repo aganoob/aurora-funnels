@@ -1,7 +1,7 @@
 import { captureMatchContext } from "@aganoob/analytics-delivery";
 import type { TrackedEvent } from "@aganoob/analytics";
 import type { CheckoutInput } from "@aganoob/payments";
-import { funnels } from "../../funnels/catalog";
+import { funnelRegistry } from "../../funnels/registry";
 import { deliveryAdapter } from "../delivery";
 import { productById } from "../products";
 import { paymentProvider } from "./providers";
@@ -14,11 +14,11 @@ function validInput(input: Partial<CheckoutInput>): input is CheckoutInput {
 
 export async function createCheckoutForRequest(request: Request, input: Partial<CheckoutInput>) {
   if (!validInput(input)) throw new Error("Invalid checkout request");
-  const funnel = funnels[input.funnelId as keyof typeof funnels];
+  const funnel = funnelRegistry[input.funnelId as keyof typeof funnelRegistry];
   const product = productById(input.productId);
   const offer = product?.offers[input.offerId];
   if (!funnel || funnel.productId !== input.productId || !product || !offer) throw new Error("Unknown funnel, product, or offer");
-  if (funnel.checkoutOffers && !funnel.checkoutOffers.includes(input.offerId)) throw new Error("Offer is unavailable in this funnel");
+  if (!(funnel.checkoutOffers as readonly string[]).includes(input.offerId)) throw new Error("Offer is unavailable in this funnel");
   if (!("payment" in offer)) throw new Error(`Offer ${input.offerId} uses the legacy Stripe configuration`);
 
   const event: TrackedEvent = {
