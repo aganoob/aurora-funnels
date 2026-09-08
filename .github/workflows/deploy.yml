@@ -29,13 +29,12 @@ jobs:
         working-directory: aurora-meal-plan
     env:
       NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-      NEXT_PUBLIC_APP_URL: https://aurora-meal-staging-kbysqzdoca-ew.a.run.app
       NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: ${{ vars.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY }}
       NEXT_PUBLIC_POSTHOG_KEY: ${{ vars.NEXT_PUBLIC_POSTHOG_KEY }}
       NEXT_PUBLIC_POSTHOG_HOST: ${{ vars.NEXT_PUBLIC_POSTHOG_HOST }}
       NEXT_PUBLIC_META_DATASET_ID: ${{ vars.NEXT_PUBLIC_META_DATASET_ID }}
       NEXT_PUBLIC_META_MODE: ${{ vars.NEXT_PUBLIC_META_MODE }}
-      SHIPFLOW_PUBLIC_URL: https://aurora-meal-staging-kbysqzdoca-ew.a.run.app
+      SHIPFLOW_PUBLIC_URL: ${{ vars.SHIPFLOW_PUBLIC_URL }}
       STRIPE_PRICE_AURORA_MEAL_PLAN_ANNUAL: ${{ vars.STRIPE_PRICE_AURORA_MEAL_PLAN_ANNUAL }}
       META_TEST_EVENT_CODE: ${{ vars.META_TEST_EVENT_CODE }}
     steps:
@@ -98,7 +97,6 @@ jobs:
         working-directory: aurora-meal-plan
     env:
       NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-      NEXT_PUBLIC_APP_URL: ${{ vars.NEXT_PUBLIC_APP_URL }}
       NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: ${{ vars.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY }}
       NEXT_PUBLIC_POSTHOG_KEY: ${{ vars.NEXT_PUBLIC_POSTHOG_KEY }}
       NEXT_PUBLIC_POSTHOG_HOST: ${{ vars.NEXT_PUBLIC_POSTHOG_HOST }}

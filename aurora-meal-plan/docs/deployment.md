@@ -86,7 +86,6 @@ Create a repository Actions secret named `NPM_TOKEN` with a GitHub personal acce
 Create separate Stripe test/live prices and webhook endpoints, Meta destinations, and PostHog projects. Set the following GitHub environment variables for both `staging` and `production`:
 
 - `GCP_DEPLOY_SERVICE_ACCOUNT`
-- `NEXT_PUBLIC_APP_URL`
 - `NEXT_PUBLIC_POSTHOG_KEY`
 - `NEXT_PUBLIC_POSTHOG_HOST`
 - `NEXT_PUBLIC_META_DATASET_ID`
@@ -106,12 +105,12 @@ Set `META_TEST_EVENT_CODE` for staging. Set these repository variables once:
 
 The first release of each environment is available on its default Cloud Run URL; custom-domain setup can wait. For this project, use these temporary URLs in the matching GitHub environment variables:
 
-| Environment | `NEXT_PUBLIC_APP_URL` and `SHIPFLOW_PUBLIC_URL` |
+| Environment | `SHIPFLOW_PUBLIC_URL` |
 | --- | --- |
 | `staging` | `https://aurora-meal-staging-kbysqzdoca-ew.a.run.app` |
 | `production` | Read the value reported by `gcloud run services describe` after its first release. |
 
-Set `NEXT_PUBLIC_APP_URL` before the release because it is embedded in the browser build and used as the Stripe Checkout success and cancellation origin. Set `SHIPFLOW_PUBLIC_URL` to the same value for the runtime configuration. Cloud Run generates the hostname, so use the existing staging URL above and retrieve the production URL after its initial release:
+Set `SHIPFLOW_PUBLIC_URL` before the release. The server uses it for origin validation and Stripe Checkout success and cancellation URLs. Cloud Run generates the hostname, so use the existing staging URL above and retrieve the production URL after its initial release:
 
 ```bash
 gcloud run services describe aurora-meal-staging --project aurora-funnels --region europe-west1 --format='value(status.url)'
@@ -120,7 +119,7 @@ gcloud run services describe aurora-meal-production --project aurora-funnels --r
 
 Create or update the Stripe webhook endpoint for each environment to `<Cloud Run URL>/api/stripe/webhook`, then store that endpoint's signing secret in the corresponding `stripe-webhook-secret` Secret Manager value. Keep the staging Stripe test-mode endpoint separate from the production live-mode endpoint.
 
-When the custom domains are available, replace both GitHub environment variables and the Stripe webhook endpoint URL with the matching domain, then release each environment again.
+When the custom domains are available, replace `SHIPFLOW_PUBLIC_URL` and the Stripe webhook endpoint URL with the matching domain, then release each environment again.
 
 ## Routine operations
 

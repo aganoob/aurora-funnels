@@ -10,7 +10,6 @@ describe("production runtime configuration", () => {
   it("requires billing and server analytics credentials in production", () => {
     expect(missingRuntimeConfiguration({ NODE_ENV: "production" })).toEqual([
       "META_CAPI_ACCESS_TOKEN",
-      "NEXT_PUBLIC_APP_URL",
       "POSTHOG_PROJECT_API_KEY",
       "STRIPE_PRICE_AURORA_MEAL_PLAN_ANNUAL",
       "STRIPE_SECRET_KEY",
