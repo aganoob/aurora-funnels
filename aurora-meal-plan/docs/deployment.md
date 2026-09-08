@@ -90,6 +90,7 @@ Create separate Stripe test/live prices and webhook endpoints, Meta destinations
 - `NEXT_PUBLIC_POSTHOG_HOST`
 - `NEXT_PUBLIC_META_DATASET_ID`
 - `NEXT_PUBLIC_META_MODE`
+- `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`
 - `SHIPFLOW_PUBLIC_URL`
 - `STRIPE_PRICE_AURORA_MEAL_PLAN_ANNUAL`
 
