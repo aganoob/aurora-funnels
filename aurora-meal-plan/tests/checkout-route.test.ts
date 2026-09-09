@@ -22,6 +22,7 @@ const checkoutInput = {
   sessionId: "session-1",
   assignments: {},
   attribution: { firstTouch: {}, currentTouch: {} },
+  checkoutAttemptId: "attempt-1",
 };
 
 const requestFor = () => new Request("http://localhost:3000/api/checkout", {
@@ -69,7 +70,7 @@ describe("checkout route", () => {
     await expect(response.json()).resolves.toEqual({ kind: "embedded", provider: "stripe", reference: "cs_test_123", clientSecret: "cs_test_secret" });
     expect(create).toHaveBeenCalledWith(expect.objectContaining({
       ui_mode: "embedded",
-      return_url: expect.stringMatching(/\/f\/aurora-meal-plan\?checkout=return&provider=stripe&session_id=\{CHECKOUT_SESSION_ID\}$/),
+      return_url: "http://localhost:3000/f/aurora-meal-plan/payment-success?checkout_session_id={CHECKOUT_SESSION_ID}&funnel_session_id=session-1",
       client_reference_id: "session-1",
       metadata: expect.objectContaining({
         acquisition_platform: "custom_funnel",
@@ -83,7 +84,7 @@ describe("checkout route", () => {
           funnel_session_id: "session-1",
         },
       },
-    }), { idempotencyKey: "shipflow:session-1:annual" });
+    }), { idempotencyKey: "shipflow:session-1:annual:attempt-1" });
   });
 
   it("keeps funnel correlation metadata when the subscription starts with a trial", async () => {

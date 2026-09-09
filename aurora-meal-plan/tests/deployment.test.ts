@@ -99,6 +99,10 @@ describe("CI/CD bootstrap", () => {
     expect(dockerfile).toContain(
       "NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=$NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY",
     );
+    expect(dockerfile).toContain("ARG NEXT_PUBLIC_JOURNEY_BASE_URL");
+    expect(dockerfile).toContain(
+      "NEXT_PUBLIC_JOURNEY_BASE_URL=$NEXT_PUBLIC_JOURNEY_BASE_URL",
+    );
   });
 
   it("limits candidate tags to Cloud Run's combined service and tag length", async () => {

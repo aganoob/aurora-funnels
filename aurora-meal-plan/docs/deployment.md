@@ -94,6 +94,8 @@ Create separate Stripe test/live prices and webhook endpoints, Meta destinations
 - `SHIPFLOW_PUBLIC_URL`
 - `STRIPE_PRICE_AURORA_MEAL_PLAN_ANNUAL`
 
+The deployment workflow builds staging with `https://journey-stage.dev.aurorafirst.dev` and production with `https://journey.aurorafirst.ai` as `NEXT_PUBLIC_JOURNEY_BASE_URL`.
+
 > **Temporary production bootstrap:** the initial production release may use the current staging credentials. Before enabling live payments or production analytics, replace every `shipflow-production-*` secret and production environment variable with production-specific Stripe, Meta, and PostHog credentials, then release production again.
 
 Set `META_TEST_EVENT_CODE` for staging. Set these repository variables once:
