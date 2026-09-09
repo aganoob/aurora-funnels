@@ -12,6 +12,8 @@ export const stripeCapabilities: PaymentProviderCapabilities = {
 };
 
 type StripeOffer = ProviderOfferDefinition["payment"] & { provider: "stripe" };
+type CheckoutAttemptInput = CheckoutInput & { checkoutAttemptId?: string };
+type StripeCheckoutOutcome = CheckoutOutcome & { funnelSessionId?: string };
 
 function stripeOffer(offer: OfferDefinition): StripeOffer {
   if (!("payment" in offer)) throw new Error("This offer uses the legacy Stripe configuration.");
@@ -42,7 +44,7 @@ export async function createStripeCheckout({ request, input, offer, conversionCo
   const localMock = process.env.NODE_ENV !== "production" && (process.env.MOCK_CHECKOUT === "true" || !key?.trim());
   if (localMock) {
     const reference = `mock_${crypto.randomUUID()}`;
-    return { kind: "redirect", provider: "stripe", reference, mocked: true, url: `${origin}/f/${input.funnelId}?checkout=mock&session_id=${reference}&offer_id=${encodeURIComponent(input.offerId)}` };
+    return { kind: "redirect", provider: "stripe", reference, mocked: true, url: `${origin}/f/${input.funnelId}/payment-success?checkout_session_id=${encodeURIComponent(reference)}&funnel_session_id=${encodeURIComponent(input.sessionId)}&offer_id=${encodeURIComponent(input.offerId)}` };
   }
   if (!key?.trim()) throw new Error("Stripe is not configured");
   const payment = stripeOffer(offer);
@@ -58,7 +60,7 @@ export async function createStripeCheckout({ request, input, offer, conversionCo
     acquisition_platform: "custom_funnel",
     funnel_session_id: input.sessionId,
   };
-  const returnUrl = `${origin}/f/${input.funnelId}?checkout=return&provider=stripe&session_id={CHECKOUT_SESSION_ID}`;
+  const successUrl = `${origin}/f/${input.funnelId}/payment-success?checkout_session_id={CHECKOUT_SESSION_ID}&funnel_session_id=${encodeURIComponent(input.sessionId)}`;
   const params: Stripe.Checkout.SessionCreateParams = {
     mode: "subscription",
     line_items: [{ price: payment.catalogReference, quantity: 1 }],
@@ -69,13 +71,14 @@ export async function createStripeCheckout({ request, input, offer, conversionCo
   };
   if (presentation === "embedded") {
     params.ui_mode = "embedded";
-    params.return_url = returnUrl;
+    params.return_url = successUrl;
     params.redirect_on_completion = "if_required";
   } else {
-    params.success_url = returnUrl;
-    params.cancel_url = `${origin}/f/${input.funnelId}?checkout=cancelled`;
+    params.success_url = successUrl;
+    params.cancel_url = `${origin}/f/${input.funnelId}/payment-failed?funnel_session_id=${encodeURIComponent(input.sessionId)}`;
   }
-  const session = await new Stripe(key).checkout.sessions.create(params, { idempotencyKey: `shipflow:${input.sessionId}:${input.offerId}` });
+  const attemptId = (input as CheckoutAttemptInput).checkoutAttemptId ?? crypto.randomUUID();
+  const session = await new Stripe(key).checkout.sessions.create(params, { idempotencyKey: `shipflow:${input.sessionId}:${input.offerId}:${attemptId}` });
   if (presentation === "embedded") {
     if (!session.client_secret) throw new Error("Stripe did not return an embedded checkout client secret");
     return { kind: "embedded", provider: "stripe", reference: session.id, clientSecret: session.client_secret };
@@ -84,15 +87,15 @@ export async function createStripeCheckout({ request, input, offer, conversionCo
   return { kind: "redirect", provider: "stripe", reference: session.id, url: session.url };
 }
 
-export async function getStripeCheckoutOutcome(reference: string): Promise<CheckoutOutcome> {
+export async function getStripeCheckoutOutcome(reference: string): Promise<StripeCheckoutOutcome> {
   const key = process.env.STRIPE_SECRET_KEY;
   if (reference.startsWith("mock_") && process.env.NODE_ENV !== "production" && (process.env.MOCK_CHECKOUT === "true" || !key?.trim())) return { provider: "stripe", reference, status: "paid" };
   if (!key?.trim()) throw new Error("Stripe is not configured");
   const session = await new Stripe(key).checkout.sessions.retrieve(reference, { expand: ["subscription", "total_details"] });
   const metadata = session.metadata ?? {};
   const subscription = typeof session.subscription === "object" && session.subscription ? session.subscription : undefined;
-  const status: CheckoutOutcome["status"] = session.status === "open" ? "pending" : session.payment_status === "unpaid" ? "failed" : subscription?.status === "trialing" ? "trialing" : "paid";
-  return { provider: "stripe", reference: session.id, status, productId: metadata.product_id, funnelId: metadata.funnel_id, offerId: metadata.offer_id, subscriptionId: subscription?.id ?? (typeof session.subscription === "string" ? session.subscription : undefined), assignments: assignments(metadata.experiment_assignments), conversionContextId: metadata.shipflow_context_id, subtotal: amount(session.amount_subtotal), amount: amount(session.amount_total), discountAmount: amount(session.total_details?.amount_discount), currency: session.currency ?? undefined };
+  const status: CheckoutOutcome["status"] = session.status === "open" || session.status === "expired" ? "failed" : session.payment_status === "unpaid" ? "pending" : subscription?.status === "trialing" ? "trialing" : "paid";
+  return { provider: "stripe", reference: session.id, status, funnelSessionId: session.client_reference_id ?? metadata.funnel_session_id, productId: metadata.product_id, funnelId: metadata.funnel_id, offerId: metadata.offer_id, subscriptionId: subscription?.id ?? (typeof session.subscription === "string" ? session.subscription : undefined), assignments: assignments(metadata.experiment_assignments), conversionContextId: metadata.shipflow_context_id, subtotal: amount(session.amount_subtotal), amount: amount(session.amount_total), discountAmount: amount(session.total_details?.amount_discount), currency: session.currency ?? undefined };
 }
 
 export async function stripeWebhookOutcome(event: Stripe.Event): Promise<CheckoutOutcome | undefined> {
