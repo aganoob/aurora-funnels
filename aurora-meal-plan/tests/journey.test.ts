@@ -13,6 +13,6 @@ describe("Journey welcome URL", () => {
   it("uses the staging Journey origin when no public origin is configured", () => {
     vi.stubEnv("NEXT_PUBLIC_JOURNEY_BASE_URL", "");
 
-    expect(journeyWelcomeUrl("session-1")).toBe("https://journey-stage.dev.aurorafirst.dev/welcome?funnel_session_id=session-1&platform=custom_funnel");
+    expect(journeyWelcomeUrl("session-1")).toBe("https://ai-journey-alpha.web.app/welcome?funnel_session_id=session-1&platform=custom_funnel");
   });
 });

@@ -1,4 +1,4 @@
-const stagingJourneyOrigin = "https://journey-stage.dev.aurorafirst.dev";
+const stagingJourneyOrigin = "https://ai-journey-alpha.web.app";
 
 export function journeyWelcomeUrl(sessionId: string) {
   const url = new URL("/welcome", process.env.NEXT_PUBLIC_JOURNEY_BASE_URL || stagingJourneyOrigin);

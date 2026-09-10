@@ -127,6 +127,17 @@ describe("CI/CD bootstrap", () => {
     expect(workflow).toContain("shipflow deploy status --environment production --json");
     expect(workflow.match(/curl --fail-with-body/g)).toHaveLength(2);
   });
+
+  it("loads the Journey origin from each GitHub environment", async () => {
+    const workflow = await readFile(
+      resolve(process.cwd(), "../.github/workflows/deploy.yml"),
+      "utf8",
+    );
+
+    expect(workflow.match(/NEXT_PUBLIC_JOURNEY_BASE_URL: \$\{\{ vars\.NEXT_PUBLIC_JOURNEY_BASE_URL \}\}/g))
+      .toHaveLength(2);
+    expect(workflow).not.toContain("journey-stage.dev.aurorafirst.dev");
+  });
 });
 
 describe("health endpoint", () => {
