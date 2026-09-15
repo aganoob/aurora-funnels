@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
-import { canonicalEvents, type TrackedEvent } from "@aganoob/analytics";
+import type { TrackedEvent } from "@aganoob/analytics";
 import { withMatchContext } from "@aganoob/analytics-delivery";
 import { funnelProducts } from "../../../funnels/registry";
+import { isAppEvent } from "../../../lib/analytics-events";
 import { hasValidRequestOrigin } from "../../../lib/request-origin";
 
 export async function POST(request: Request) {
@@ -9,7 +10,7 @@ export async function POST(request: Request) {
   const submitted = await request.json() as TrackedEvent;
   if (!hasValidRequestOrigin(request)) return NextResponse.json({ error: "Invalid origin" }, { status: 403 });
   const event = withMatchContext(submitted, request);
-  if (!canonicalEvents.includes(event.event) || !event.context?.eventId || !event.context?.occurredAt) return NextResponse.json({ error: "Invalid canonical event" }, { status: 400 });
+  if (!isAppEvent(event.event) || !event.context?.eventId || !event.context?.occurredAt) return NextResponse.json({ error: "Invalid canonical event" }, { status: 400 });
   const expectedProductId = funnelProducts[event.context.funnelId as keyof typeof funnelProducts];
   if (!expectedProductId) return NextResponse.json({
     error: "Invalid funnel context",

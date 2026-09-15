@@ -87,7 +87,7 @@ export function FunnelApp({ funnelId = defaultFunnelId, paymentResult }: { funne
       if (outcome.status === "paid" || outcome.status === "trialing") {
         if (!completedCheckoutReferences.current.has(outcome.reference)) {
           completedCheckoutReferences.current.add(outcome.reference);
-          await browserAnalytics.track("checkout_completed", { ...context, sessionId: recoveredSessionId, eventId: crypto.randomUUID(), occurredAt: new Date().toISOString() }, { checkout_session_id: outcome.reference, offer_id: offerId, payment_status: outcome.status, value: outcome.amount, currency: outcome.currency });
+          await browserAnalytics.track("purchase_completed", { ...context, sessionId: recoveredSessionId, eventId: crypto.randomUUID(), occurredAt: new Date().toISOString() }, { checkout_session_id: outcome.reference, offer_id: offerId, payment_status: outcome.status, value: outcome.amount, currency: outcome.currency });
         }
       }
       const destination = destinationFor(outcome.status, offerId);

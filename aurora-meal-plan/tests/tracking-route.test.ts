@@ -32,6 +32,20 @@ describe("analytics tracking route", () => {
     await expect(response.json()).resolves.toEqual({ accepted: true, event_id: "event-1", delivery: "browser-only" });
   });
 
+  it("accepts purchase_completed as the payment completion event", async () => {
+    const response = await POST(requestFor({ ...event, event: "purchase_completed" }));
+
+    expect(response.status).toBe(202);
+    await expect(response.json()).resolves.toEqual({ accepted: true, event_id: "event-1", delivery: "browser-only" });
+  });
+
+  it("rejects the replaced checkout_completed event", async () => {
+    const response = await POST(requestFor({ ...event, event: "checkout_completed" }));
+
+    expect(response.status).toBe(400);
+    await expect(response.json()).resolves.toEqual({ error: "Invalid canonical event" });
+  });
+
   it("identifies an unknown funnel ID", async () => {
     const response = await POST(requestFor({ ...event, context: { ...event.context, funnelId: "old-funnel" } }));
 
